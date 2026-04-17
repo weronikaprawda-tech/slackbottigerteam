@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EMEA SMB Slackbot Tiger Team</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --slack-sidebar: #350d36;
+      --slack-sidebar-hover: #3f1443;
+      --slack-sidebar-active: #1164a3;
+      --slack-canvas: #1a1d21;
+      --slack-panel: #222529;
+      --slack-border: #383b40;
+      --slack-text: #f8f8f8;
+      --slack-muted: #ababad;
+      --slack-green: #2eb886;
+      --slack-radius: 6px;
+      --sidebar-width: 272px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    body {
+      min-height: 100%;
+      margin: 0;
+      font-family: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--slack-canvas);
+      color: var(--slack-text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100%;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      min-width: var(--sidebar-width);
+      background: var(--slack-sidebar);
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(0, 0, 0, 0.2);
+    }
+
+    .workspace-header {
+      padding: 12px 14px;
+      font-weight: 900;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: default;
+    }
+
+    .workspace-emoji {
+      font-size: 22px;
+      line-height: 1.2;
+    }
+
+    .workspace-names {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .workspace-title {
+      font-size: 16px;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      color: #fff;
+    }
+
+    .workspace-sub {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--slack-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .sidebar-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0 16px;
+    }
+
+    .nav-section-label {
+      padding: 8px 16px 4px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--slack-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 8px;
+      padding: 6px 8px;
+      border-radius: var(--slack-radius);
+      font-size: 15px;
+      font-weight: 600;
+      color: #d1d2d3;
+      cursor: pointer;
+      transition: background 0.12s ease;
+      border: none;
+      background: transparent;
+      width: calc(100% - 16px);
+      font-family: inherit;
+      text-align: left;
+    }
+
+    .nav-item:hover {
+      background: var(--slack-sidebar-hover);
+    }
+
+    .nav-item.active {
+      background: var(--slack-sidebar-active);
+      color: #fff;
+    }
+
+    .nav-hash {
+      color: var(--slack-muted);
+      font-weight: 400;
+    }
+
+    .nav-item.active .nav-hash {
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .presence {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--slack-green);
+      margin-left: auto;
+      box-shadow: 0 0 0 2px var(--slack-sidebar);
+      flex-shrink: 0;
+    }
+
+    .sidebar-footer {
+      padding: 12px 16px;
+      font-size: 12px;
+      color: var(--slack-muted);
+      border-top: 1px solid rgba(0, 0, 0, 0.15);
+      line-height: 1.45;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: var(--slack-canvas);
+    }
+
+    .topbar {
+      height: 49px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--slack-border);
+      background: var(--slack-panel);
+      gap: 12px;
+    }
+
+    .topbar-title {
+      font-weight: 900;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .topbar-title span.ch {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--slack-muted);
+      flex-shrink: 0;
+    }
+
+    .topbar-spacer {
+      flex: 1;
+    }
+
+    .topbar-link {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1d9bd1;
+      text-decoration: none;
+    }
+
+    .topbar-link:hover {
+      text-decoration: underline;
+    }
+
+    .topbar-link[hidden] {
+      display: none;
+    }
+
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 16px 20px 28px;
+    }
+
+    .panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    /* Usage / Tableau: stack by content height and scroll inside .content (don’t squeeze the iframe) */
+    #panel-tableau {
+      gap: 14px;
+      flex: 0 0 auto;
+      min-height: min-content;
+    }
+
+    .panel[hidden] {
+      display: none;
+    }
+
+    .usage-intro {
+      flex-shrink: 0;
+      padding: 18px 20px 20px;
+      border-radius: 10px;
+      border: 1px solid var(--slack-border);
+      background: rgba(34, 37, 41, 0.85);
+      font-size: 14px;
+      line-height: 1.55;
+      color: #e3e4e6;
+    }
+
+    .usage-intro h2 {
+      margin: 0 0 10px;
+      font-family: "Plus Jakarta Sans", "Lato", sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .usage-intro p {
+      margin: 0 0 10px;
+    }
+
+    .usage-intro p:last-child {
+      margin-bottom: 0;
+    }
+
+    .usage-intro ul {
+      margin: 8px 0 0;
+      padding-left: 1.2rem;
+    }
+
+    .usage-intro li {
+      margin-bottom: 6px;
+    }
+
+    .usage-intro strong {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .usage-intro a {
+      color: #1d9bd1;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .usage-intro a:hover {
+      text-decoration: underline;
+    }
+
+    .usage-intro code {
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--slack-border);
+    }
+
+    .embed-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background: var(--slack-panel);
+      border: 1px solid var(--slack-border);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+    }
+
+    #panel-tableau .embed-card {
+      flex: 0 0 auto;
+    }
+
+    .embed-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--slack-border);
+      background: rgba(0, 0, 0, 0.2);
+      font-size: 13px;
+      color: var(--slack-muted);
+    }
+
+    .embed-toolbar strong {
+      color: var(--slack-text);
+      font-weight: 700;
+    }
+
+    .embed-frame-wrap {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      background: #0b0c0e;
+    }
+
+    .embed-frame-wrap iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    #panel-tableau .embed-stack {
+      flex: 0 0 auto;
+      width: 100%;
+    }
+
+    /* Tall iframe; page scrolls in .content so intro + canvas list + dashboard are all reachable */
+    #panel-tableau .embed-frame-wrap {
+      flex: 0 0 auto;
+      min-height: clamp(640px, 75vh, 1400px);
+    }
+
+    .canvas-ids-panel {
+      flex-shrink: 0;
+      padding: 8px 10px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--slack-border);
+      background: rgba(22, 24, 28, 0.95);
+    }
+
+    .canvas-ids-panel h3 {
+      margin: 0 0 6px;
+      font-family: "Plus Jakarta Sans", "Lato", sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--slack-muted);
+    }
+
+    .canvas-ids-panel .canvas-ids-note {
+      margin: 0 0 8px;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #a8a9ad;
+    }
+
+    .canvas-ids-panel .canvas-ids-note code {
+      font-size: 10px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--slack-border);
+    }
+
+    .canvas-id-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin: 0;
+      padding: 2px 4px 2px 2px;
+      list-style: none;
+      max-height: min(32vh, 280px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .canvas-chips-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .canvas-legend {
+      margin: 0;
+      font-size: 11px;
+      line-height: 1.35;
+      color: var(--slack-muted);
+      max-width: 36rem;
+    }
+
+    .canvas-toggle-group {
+      display: inline-flex;
+      flex-shrink: 0;
+      border-radius: 6px;
+      border: 1px solid var(--slack-border);
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    .canvas-toggle-btn {
+      margin: 0;
+      padding: 4px 10px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--slack-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+
+    .canvas-toggle-btn:hover {
+      color: #e8e8e8;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .canvas-toggle-btn.is-active {
+      color: #fff;
+      background: var(--slack-sidebar-active);
+    }
+
+    /* Compact rows: one line each; labels only in toolbar (toggle + legend) */
+    .canvas-card {
+      margin: 0;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: rgba(34, 37, 41, 0.75);
+      border: 1px solid rgba(56, 59, 64, 0.85);
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 8px;
+      min-width: 0;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .canvas-card[hidden] {
+      display: none !important;
+    }
+
+    .canvas-card:hover {
+      border-color: rgba(97, 31, 105, 0.55);
+      background: rgba(97, 31, 105, 0.1);
+    }
+
+    .canvas-card__title {
+      font-family: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.35;
+      color: #e8e8ea;
+      flex: 1;
+      min-width: 0;
+      word-break: break-word;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+    }
+
+    .canvas-card__title--muted {
+      font-size: 11px;
+      font-weight: 500;
+      color: #9a9b9f;
+      -webkit-line-clamp: 2;
+    }
+
+    .canvas-card__title--lead {
+      font-weight: 700;
+      color: #f2f2f3;
+    }
+
+    .canvas-card__id {
+      display: inline-block;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 10px;
+      font-weight: 600;
+      color: #b8b8bc;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      word-break: break-all;
+      flex-shrink: 0;
+      max-width: 42%;
+    }
+
+    .canvas-card__id--emphasis {
+      font-size: 11px;
+      color: #fff;
+      border-color: rgba(97, 31, 105, 0.45);
+      background: rgba(97, 31, 105, 0.22);
+      max-width: 46%;
+    }
+
+    .canvas-card.canvas-card--name-first .canvas-card__title--lead {
+      font-size: 12px;
+    }
+
+    .canvas-card.canvas-card--id-first .canvas-card__id--emphasis {
+      font-size: 11px;
+    }
+
+    .canvas-ids-empty {
+      margin: 6px 0 0;
+      font-size: 11px;
+      color: var(--slack-muted);
+      font-style: italic;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .canvas-filter-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .canvas-search-wrap {
+      flex: 1 1 160px;
+      min-width: 0;
+    }
+
+    .canvas-search-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 6px 10px;
+      font-family: inherit;
+      font-size: 12px;
+      color: var(--slack-text);
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--slack-border);
+      border-radius: 6px;
+      outline: none;
+    }
+
+    .canvas-search-input::placeholder {
+      color: #7b7c80;
+    }
+
+    .canvas-search-input:focus {
+      border-color: var(--slack-sidebar-active);
+      box-shadow: 0 0 0 1px rgba(17, 100, 163, 0.45);
+    }
+
+    .canvas-filter-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      flex: 1 1 auto;
+      justify-content: flex-end;
+      min-width: 0;
+    }
+
+    .canvas-selection-summary {
+      font-size: 11px;
+      color: var(--slack-muted);
+      line-height: 1.35;
+    }
+
+    .canvas-filter-btn {
+      margin: 0;
+      padding: 4px 10px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      color: #1d9bd1;
+      background: transparent;
+      border: 1px solid rgba(29, 155, 209, 0.45);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.12s ease, border-color 0.12s ease;
+    }
+
+    .canvas-filter-btn:hover {
+      background: rgba(29, 155, 209, 0.12);
+      border-color: rgba(29, 155, 209, 0.75);
+    }
+
+    .canvas-card__check {
+      flex-shrink: 0;
+      width: 14px;
+      height: 14px;
+      margin: 2px 0 0;
+      accent-color: var(--slack-sidebar-active);
+      cursor: pointer;
+    }
+
+    .role-intro {
+      flex-shrink: 0;
+      padding: 14px 18px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--slack-border);
+      background: rgba(17, 100, 163, 0.12);
+      font-size: 14px;
+      line-height: 1.5;
+      color: #e3e4e6;
+    }
+
+    .role-intro p {
+      margin: 0;
+    }
+
+    .embed-stack {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      gap: 12px;
+    }
+
+    .embed-stack[hidden] {
+      display: none !important;
+    }
+
+    .usage-intro[hidden],
+    .role-intro[hidden] {
+      display: none !important;
+    }
+
+    .embed-note {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--slack-muted);
+      line-height: 1.5;
+      max-width: 720px;
+    }
+
+    .embed-note a {
+      color: #1d9bd1;
+    }
+
+    .embed-note__more {
+      display: block;
+      margin-top: 8px;
+      font-size: 11px;
+      color: #8d8e92;
+    }
+
+    .canvas-filter-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* About canvas — richer layout */
+    .about-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      border: 1px solid var(--slack-border);
+      border-radius: 12px;
+      padding: 0;
+      background:
+        radial-gradient(1200px 500px at 10% -20%, rgba(97, 31, 105, 0.45), transparent 55%),
+        radial-gradient(900px 400px at 90% 0%, rgba(17, 100, 163, 0.35), transparent 50%),
+        linear-gradient(180deg, #1e2126 0%, #1a1d21 40%, #16181c 100%);
+    }
+
+    .about-inner {
+      padding: 28px 28px 36px;
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .about-hero {
+      position: relative;
+      padding: 28px 24px 26px;
+      margin: 20px 20px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background:
+        linear-gradient(135deg, rgba(53, 13, 54, 0.85) 0%, rgba(17, 100, 163, 0.35) 100%);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .about-hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .about-hero-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .about-kicker {
+      margin: 0 0 10px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.65);
+    }
+
+    .about-hero h1 {
+      margin: 0 0 12px;
+      font-family: "Plus Jakarta Sans", "Lato", sans-serif;
+      font-size: clamp(1.35rem, 3.5vw, 1.85rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      color: #fff;
+    }
+
+    .about-hero .gradient-text {
+      background: linear-gradient(90deg, #ecb22e, #36c5f0, #2eb886);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .about-lede {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.55;
+      color: rgba(255, 255, 255, 0.88);
+      max-width: 52ch;
+    }
+
+    .about-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .about-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #e8e8e8;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .audience-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 24px 0 8px;
+    }
+
+    @media (max-width: 720px) {
+      .audience-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .audience-card {
+      padding: 16px 16px 18px;
+      border-radius: 10px;
+      border: 1px solid var(--slack-border);
+      background: rgba(0, 0, 0, 0.25);
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .audience-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(97, 31, 105, 0.6);
+    }
+
+    .audience-card .ac-icon {
+      font-size: 22px;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .audience-card h3 {
+      margin: 0 0 8px;
+      font-family: "Plus Jakarta Sans", "Lato", sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .audience-card p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--slack-muted);
+    }
+
+    .bento {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 640px) {
+      .bento {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .bento-wide {
+      grid-column: 1 / -1;
+    }
+
+    .section-card {
+      padding: 20px 20px 18px;
+      border-radius: 10px;
+      border: 1px solid var(--slack-border);
+      background: rgba(34, 37, 41, 0.65);
+      backdrop-filter: blur(8px);
+    }
+
+    .section-card h2 {
+      margin: 0 0 12px;
+      font-family: "Plus Jakarta Sans", "Lato", sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+
+    .section-card h2 .h-emoji {
+      font-size: 1.25em;
+      line-height: 1;
+    }
+
+    .about-section {
+      margin-bottom: 14px;
+    }
+
+    .about-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .about-section p,
+    .about-section li {
+      font-size: 15px;
+      line-height: 1.55;
+      color: #e3e4e6;
+    }
+
+    .about-section p {
+      margin: 0 0 12px;
+    }
+
+    .about-section p:last-child {
+      margin-bottom: 0;
+    }
+
+    .about-section ul {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    .about-section li {
+      margin-bottom: 8px;
+    }
+
+    .about-section blockquote {
+      margin: 12px 0 0;
+      padding: 14px 18px;
+      border: none;
+      border-left: 4px solid #ecb22e;
+      background: linear-gradient(90deg, rgba(236, 178, 46, 0.12), transparent);
+      border-radius: 0 10px 10px 0;
+      font-size: 15px;
+      font-style: italic;
+      color: #e8e9ea;
+    }
+
+    .goal-columns {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 720px) {
+      .goal-columns {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .goal-mini {
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 13px;
+      line-height: 1.45;
+      color: #d1d2d3;
+    }
+
+    .goal-mini strong {
+      display: block;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #36c5f0;
+      margin-bottom: 6px;
+    }
+
+    .team-sub {
+      margin: 16px 0 10px;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--slack-muted);
+    }
+
+    .person-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .person-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--slack-border);
+      background: rgba(0, 0, 0, 0.15);
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.12s ease, border-color 0.12s ease;
+    }
+
+    .person-row:hover {
+      background: rgba(97, 31, 105, 0.25);
+      border-color: #611f69;
+    }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 0.02em;
+      background: linear-gradient(135deg, var(--a1, #611f69), var(--a2, #1164a3));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    }
+
+    .person-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .person-label {
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .person-subl {
+      font-size: 13px;
+      color: #1d9bd1;
+      font-weight: 600;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        width: 72px;
+        min-width: 72px;
+      }
+
+      .workspace-names,
+      .nav-section-label,
+      .sidebar-footer,
+      .nav-item .nav-label {
+        display: none;
+      }
+
+      .nav-item {
+        justify-content: center;
+      }
+
+      .presence {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Workspace navigation">
+      <div class="workspace-header">
+        <span class="workspace-emoji" aria-hidden="true">🐯</span>
+        <div class="workspace-names">
+          <span class="workspace-title">Slackbot Tiger Team</span>
+          <span class="workspace-sub">EMEA SMB</span>
+        </div>
+      </div>
+      <div class="sidebar-scroll">
+        <div class="nav-section-label">Channels</div>
+        <button type="button" class="nav-item active" data-channel="about" title="about-us">
+          <span class="nav-hash">#</span>
+          <span class="nav-label">about-us</span>
+          <span class="presence" aria-hidden="true"></span>
+        </button>
+        <div class="nav-section-label">Usage</div>
+        <button type="button" class="nav-item" data-channel="usage" title="usage-stats">
+          <span class="nav-hash">#</span>
+          <span class="nav-label">usage-stats</span>
+        </button>
+        <div class="nav-section-label">JTBD by role</div>
+        <button type="button" class="nav-item" data-channel="ae" title="ae">
+          <span class="nav-hash">#</span>
+          <span class="nav-label">ae</span>
+        </button>
+        <button type="button" class="nav-item" data-channel="flm" title="flm">
+          <span class="nav-hash">#</span>
+          <span class="nav-label">flm</span>
+        </button>
+        <button type="button" class="nav-item" data-channel="se" title="se">
+          <span class="nav-hash">#</span>
+          <span class="nav-label">se</span>
+        </button>
+        <button type="button" class="nav-item" data-channel="specialist" title="specialist">
+          <span class="nav-hash">#</span>
+          <span class="nav-label">specialist</span>
+        </button>
+      </div>
+      <div class="sidebar-footer">
+        Styled like Slack for presentation only. Not affiliated with Slack Technologies.
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-title">
+          <span class="ch" id="channel-title"># about-us</span>
+          <span class="badge" id="channel-badge">Canvas</span>
+        </div>
+        <div class="topbar-spacer"></div>
+        <a
+          class="topbar-link"
+          id="tableau-open-link"
+          href="https://prod-uswest-c.online.tableau.com/t/salesforce/views/IndividualCanvasUsage/GridView/8e537e0e-cb7e-465c-9d57-a3daf3ee72e0/944df2aa-b2c3-4243-bc7e-fadd696faec8"
+          target="_blank"
+          rel="noopener noreferrer"
+          hidden
+        >
+          Open in Tableau ↗
+        </a>
+      </header>
+
+      <div class="content">
+        <div class="panel" id="panel-about" role="tabpanel">
+          <div class="about-scroll">
+            <div class="about-hero">
+              <div class="about-hero-content">
+                <p class="about-kicker">EMEA SMB · Slack AI</p>
+                <h1>
+                  🐯 <span class="gradient-text">Slackbot Tiger Team</span> — About us
+                </h1>
+                <p class="about-lede">
+                  We help reps, managers, and teams across Salesforce work smarter in Slack — not only Account Executives, but <strong>Sales Leaders</strong> and colleagues in other parts of the company who want repeatable prompts, clearer insights, and less time lost to busywork.
+                </p>
+                <div class="about-pills" aria-hidden="true">
+                  <span class="about-pill">Pipe &amp; ACV</span>
+                  <span class="about-pill">Coaching &amp; cadence</span>
+                  <span class="about-pill">Cross-org pilots</span>
+                </div>
+              </div>
+            </div>
+            <div class="about-inner">
+              <div class="audience-grid" aria-label="Who we serve">
+                <div class="audience-card">
+                  <div class="ac-icon" aria-hidden="true">🎯</div>
+                  <h3>Account Executives</h3>
+                  <p>Faster research, sharper account stories, and prompts tuned to how ESMB sells day to day.</p>
+                </div>
+                <div class="audience-card">
+                  <div class="ac-icon" aria-hidden="true">📈</div>
+                  <h3>Sales Leaders</h3>
+                  <p>Better visibility, coaching hooks, and habits that scale — so leaders can reinforce what good looks like in Slack.</p>
+                </div>
+                <div class="audience-card">
+                  <div class="ac-icon" aria-hidden="true">🌐</div>
+                  <h3>Broader Salesforce</h3>
+                  <p>We’ve shipped experiments, prompts, and learnings that other teams and regions have adapted — not just one lane.</p>
+                </div>
+              </div>
+
+              <div class="bento">
+                <section class="about-section section-card bento-wide" aria-labelledby="who-heading">
+                  <h2 id="who-heading"><span class="h-emoji" aria-hidden="true">🚀</span> Who we are</h2>
+                  <p>
+                    We are the <strong>EMEA SMB Slackbot Tiger Team</strong> — a cross-functional group of Solution Engineers and Sales leaders dedicated to Slackbot as an <strong>AI copilot</strong> for the organisation. Our focus spans the full customer-facing motion: front-line sellers, their managers, and enablement that touches multiple parts of the company.
+                  </p>
+                  <p>
+                    Our mission: make <strong>every AE and every Sales Leader</strong> more effective, and share what works with <strong>others across Salesforce</strong> who can reuse the same patterns — from prompt libraries to clinics and pilots.
+                  </p>
+                </section>
+
+                <section class="about-section section-card" aria-labelledby="goal-heading">
+                  <h2 id="goal-heading"><span class="h-emoji" aria-hidden="true">🎯</span> Our goal</h2>
+                  <p style="margin-bottom: 0">From static reports to live exploration. From endless research to clear recommendations — inside Slack, for everyone in the revenue org who depends on timely context.</p>
+                </section>
+
+                <section class="about-section section-card" aria-labelledby="together-heading">
+                  <h2 id="together-heading"><span class="h-emoji" aria-hidden="true">🤝</span> Humans + AI</h2>
+                  <p style="margin-bottom: 0">We believe that when people and agents work together, customer success compounds. We’re here to make that real where work already happens.</p>
+                </section>
+              </div>
+
+              <section class="about-section section-card" style="margin-top: 12px" aria-labelledby="serve-heading">
+                <h2 id="serve-heading"><span class="h-emoji" aria-hidden="true">✨</span> What we optimise for</h2>
+                <div class="goal-columns">
+                  <div class="goal-mini">
+                    <strong>AEs</strong>
+                    Easier access to account and territory context; less time hunting, more time selling.
+                  </div>
+                  <div class="goal-mini">
+                    <strong>Sales Leaders</strong>
+                    Repeatable prompts and rituals that reinforce pipeline hygiene, coaching, and team habits.
+                  </div>
+                  <div class="goal-mini">
+                    <strong>Other teams</strong>
+                    Playbooks and pilots others can fork — we’ve already inspired work in other regions and business units.
+                  </div>
+                </div>
+              </section>
+
+            <section class="about-section" style="margin-top: 12px" aria-labelledby="team-heading">
+              <div class="section-card">
+              <h2 id="team-heading"><span class="h-emoji" aria-hidden="true">🎉</span> The team</h2>
+
+              <div class="team-sub" id="sponsors-sub">👑 Senior Leadership Sponsors</div>
+              <div class="person-list" aria-labelledby="sponsors-sub">
+                <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U01GEN3DHHS" target="_blank" rel="noopener noreferrer">
+                  <span class="avatar" style="--a1: #9e6a03; --a2: #611f69" aria-hidden="true">S1</span>
+                  <span class="person-meta">
+                    <span class="person-label">Leadership sponsor · photo TBC</span>
+                    <span class="person-subl">View Slack profile →</span>
+                  </span>
+                </a>
+                <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U01GY0URXT2" target="_blank" rel="noopener noreferrer">
+                  <span class="avatar" style="--a1: #0b6e99; --a2: #350d36" aria-hidden="true">S2</span>
+                  <span class="person-meta">
+                    <span class="person-label">Leadership sponsor · photo TBC</span>
+                    <span class="person-subl">View Slack profile →</span>
+                  </span>
+                </a>
+              </div>
+
+              <div class="team-sub" id="members-sub">⭐ Tiger Team Members</div>
+              <div class="person-list" aria-labelledby="members-sub">
+                <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U03SR1BB2GG" target="_blank" rel="noopener noreferrer">
+                  <span class="avatar" style="--a1: #2eb886; --a2: #1a3d5c" aria-hidden="true">T1</span>
+                  <span class="person-meta">
+                    <span class="person-label">Tiger team member · photo TBC</span>
+                    <span class="person-subl">View Slack profile →</span>
+                  </span>
+                </a>
+                <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U031QRZRNQH" target="_blank" rel="noopener noreferrer">
+                  <span class="avatar" style="--a1: #e01e5a; --a2: #611f69" aria-hidden="true">T2</span>
+                  <span class="person-meta">
+                    <span class="person-label">Tiger team member · photo TBC</span>
+                    <span class="person-subl">View Slack profile →</span>
+                  </span>
+                </a>
+                <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U08B8R8M7SR" target="_blank" rel="noopener noreferrer">
+                  <span class="avatar" style="--a1: #ecb22e; --a2: #8b5a2b" aria-hidden="true">T3</span>
+                  <span class="person-meta">
+                    <span class="person-label">Tiger team member · photo TBC</span>
+                    <span class="person-subl">View Slack profile →</span>
+                  </span>
+                </a>
+                <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U0832QTDRK6" target="_blank" rel="noopener noreferrer">
+                  <span class="avatar" style="--a1: #36c5f0; --a2: #350d36" aria-hidden="true">T4</span>
+                  <span class="person-meta">
+                    <span class="person-label">Tiger team member · photo TBC</span>
+                    <span class="person-subl">View Slack profile →</span>
+                  </span>
+                </a>
+                <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U02350Y95NH" target="_blank" rel="noopener noreferrer">
+                  <span class="avatar" style="--a1: #611f69; --a2: #e01e5a" aria-hidden="true">T5</span>
+                  <span class="person-meta">
+                    <span class="person-label">Tiger team member · photo TBC</span>
+                    <span class="person-subl">View Slack profile →</span>
+                  </span>
+                </a>
+                <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U01GYL20ZR6" target="_blank" rel="noopener noreferrer">
+                  <span class="avatar" style="--a1: #1164a3; --a2: #2eb886" aria-hidden="true">T6</span>
+                  <span class="person-meta">
+                    <span class="person-label">Tiger team member · photo TBC</span>
+                    <span class="person-subl">View Slack profile →</span>
+                  </span>
+                </a>
+              </div>
+              </div>
+            </section>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-tableau" role="tabpanel" hidden>
+          <section class="usage-intro" id="usage-intro-section" aria-labelledby="usage-intro-heading">
+            <h2 id="usage-intro-heading">📊 What you’re looking at</h2>
+            <p>
+              This channel is for <strong>usage stats</strong> — a live Tableau view (<em>Individual Canvas Usage</em>) that shows how Slack <strong>canvas</strong> activity shows up in our reporting: who’s engaging, how usage breaks down, and trends we care about for adoption and coaching.
+            </p>
+            <p>
+              The <strong>usage</strong> piece is about measuring real behaviour — not just that a canvas exists, but how people interact with canvases and related workflows over time, so the Tiger Team and leaders can spot what’s working, where to nudge, and how Slackbot and canvases land in the field.
+            </p>
+            <p>
+              <strong>Slack list:</strong> The curated source for what we include lives in
+              <a href="https://salesforce.enterprise.slack.com/lists/T5J4Q04QG/F0AC2BAGT0C" target="_blank" rel="noopener noreferrer">this List</a>
+              in Salesforce Slack (sign in if prompted).
+            </p>
+            <p><strong>Typical things in the grid below include:</strong></p>
+            <ul>
+              <li>Breakdowns and filters that slice canvas usage by team, role, or segment (exact fields depend on the workbook).</li>
+              <li>Volume and frequency signals — who’s active, how often, and how that changes week to week.</li>
+              <li>Context for programmes like Prompt Clinics and pilots: are the right people in the habit?</li>
+            </ul>
+            <p style="margin-top: 12px; font-size: 13px; color: var(--slack-muted)">
+              The embedded view is URL-filtered on the <strong>Canvas ID</strong> dimension (same IDs as below). Use in-viz controls for dates and other fields.
+            </p>
+          </section>
+
+          <section class="role-intro" id="role-intro-section" hidden>
+            <p id="role-intro-text"></p>
+          </section>
+
+          <section class="canvas-ids-panel" aria-labelledby="canvas-ids-heading">
+            <h3 id="canvas-ids-heading">Canvases</h3>
+            <div class="canvas-chips-toolbar">
+              <p class="canvas-legend" id="canvas-legend-text" role="note">
+                ID first, then name · search · checkboxes filter the dashboard · Tableau URL uses Canvas ID A→Z.
+              </p>
+              <div class="canvas-toggle-group" role="group" aria-label="Emphasize name or ID">
+                <button type="button" class="canvas-toggle-btn is-active" id="canvas-toggle-id" aria-pressed="true">
+                  ID first
+                </button>
+                <button type="button" class="canvas-toggle-btn" id="canvas-toggle-name" aria-pressed="false">
+                  Name first
+                </button>
+              </div>
+            </div>
+            <p class="canvas-ids-note" id="canvas-ids-note">
+              <a href="https://salesforce.enterprise.slack.com/lists/T5J4Q04QG/F0AC2BAGT0C" target="_blank" rel="noopener noreferrer">JTBD list</a>
+              · IDs from CSV <strong>Canvas</strong> by <strong>Target</strong>. Update <code>CANVAS_IDS_BY_CHANNEL</code> in <code>index.html</code> when exports change.
+            </p>
+            <div class="canvas-filter-toolbar" id="canvas-filter-toolbar">
+              <div class="canvas-search-wrap">
+                <label class="visually-hidden" for="canvas-search-input">Search canvases by name or ID</label>
+                <input
+                  type="search"
+                  id="canvas-search-input"
+                  class="canvas-search-input"
+                  placeholder="Search by name or ID (e.g. F09)…"
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+              </div>
+              <div class="canvas-filter-meta">
+                <span class="canvas-selection-summary" id="canvas-selection-summary" aria-live="polite"></span>
+                <button type="button" class="canvas-filter-btn" id="canvas-apply-search-btn" disabled title="Select only rows that match the search and reload Tableau">
+                  Use search in dashboard
+                </button>
+                <button type="button" class="canvas-filter-btn" id="canvas-select-all-btn">
+                  Select all
+                </button>
+              </div>
+            </div>
+            <ul class="canvas-id-list" id="canvas-id-list" aria-label="JTBD canvases and Slack Canvas IDs"></ul>
+            <p class="canvas-ids-empty" id="canvas-ids-empty" hidden>
+              No canvases for this role in the current CSV export — check the Target column in Slack or add IDs under <code>CANVAS_IDS_BY_CHANNEL</code> in <code>index.html</code>.
+            </p>
+          </section>
+
+          <p class="tableau-filter-note" id="tableau-no-filter-note" hidden style="margin: 0 0 8px; font-size: 13px; color: var(--slack-muted)">
+            No Canvas IDs for this channel — nothing to pass into the Tableau URL filter.
+          </p>
+          <div class="embed-stack" id="embed-stack">
+            <div class="embed-card">
+              <div class="embed-toolbar">
+                <strong>Grid view</strong>
+                <span>·</span>
+                <span>Individual Canvas Usage</span>
+              </div>
+              <div class="embed-frame-wrap">
+                <iframe
+                  id="tableau-frame"
+                  title="Tableau: Individual Canvas Usage"
+                  loading="lazy"
+                  referrerpolicy="strict-origin-when-cross-origin"
+                  allowfullscreen
+                ></iframe>
+              </div>
+            </div>
+            <p class="embed-note" id="tableau-note">
+              <strong>Same order as this page:</strong> Canvas IDs are sent in <strong>A→Z</strong> order in the URL (string sort with numeric segments). The <strong>row order inside the grid</strong> is controlled in the published workbook — ask the owner to sort the sheet by <strong>Canvas ID</strong> ascending so the viz matches this list. If Tableau’s own filter list is hard to scroll (e.g. to reach IDs starting with <code>F09</code>), type <code>F09</code> above and click <strong>Use search in dashboard</strong> to pass only matching IDs.
+              <span class="embed-note__more">Use <code>TABLEAU_CANVAS_FILTER_STYLE = "comma"</code> so all IDs are sent in one filter. <a href="https://help.tableau.com/current/pro/desktop/en-us/embed_filter_add.htm" target="_blank" rel="noopener noreferrer">Tableau: Add filters to embed code</a>.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slack List: team T5J4Q04QG · list_id F0AC2BAGT0C — use with slackLists.items.list + lists:read -->
+  <script>
+    /** Tableau dimension used in URL filters — matches the workbook field **Canvas ID**. */
+    window.TABLEAU_CANVAS_FILTER_FIELD = "Canvas ID";
+    /**
+     * How to pass multiple Canvas IDs to the viz URL:
+     * - "comma" — one param: Canvas%20ID=id1,id2,… (Tableau documented; use this for multi-select).
+     * - "repeat" — repeated query keys (NOT recommended: Tableau Cloud often applies only ONE value, e.g. the first).
+     */
+    window.TABLEAU_CANVAS_FILTER_STYLE = "comma";
+    window.TIGER_TEAM_SLACK_LIST = {
+      url: "https://salesforce.enterprise.slack.com/lists/T5J4Q04QG/F0AC2BAGT0C",
+      teamId: "T5J4Q04QG",
+      listId: "F0AC2BAGT0C"
+    };
+    /** JTBD “Name” column keyed by Canvas file id (from CSV export). */
+    window.CANVAS_ID_TO_NAME = {"F0ADMNU26G3": "Day 1 Open Pipe Analysis (M&Q)", "F0AR6HZEDEY": "PipeGen for Agentforce & D360", "F0AELSJ8G8N": "AE Daily Command Centre", "F0AJMFZ6R51": "Progression and Pull Forward", "F0AKD70G3ND": "Marketing / Events Play", "F0AKHU4GYDT": "SE TOR", "F0AL2LSKG2F": "LD/MD Strat SE Review", "F0ALEU6JX38": "SE Scorecard Generator", "F0AQNR9SB28": "PipeGen for Slack", "F0AEKQB4F39": "Deal Review", "F0ADV2YHQM8": "AE Slackbot Prompts Collection", "F0AQAET6NAX": "FLM Slackbot Prompts Collection", "F0AKKFYHQMC": "SE Slackbot Prompts Collection", "F0AMV6UCG4R": "PipeGen for Platform", "F0ADWD7V35Z": "AE Territory Tiering & Profiling", "F0AEP8ZP7EC": "AOV Protection and Expansion", "F0ACT8V5E4V": "Account Handover", "F0ALMGU418Q": "Big Bet Account Strategy", "F0A8T3HMHM3": "Analyse My Timeperiod Pipeline", "F0ADD0M2X61": "Monthly / Quarterly Forecast Plan → \"Run my monthly forecast analysis\"", "F09KQMSSX2T": "Week Wrap & 1:1 Prep → \"Run my week wrap and 1:1 agenda\"", "F0A617J4HME": "New Logo Deal Execution", "F0A1AV6H11D": "Event / World Tour Follow-ups → \"Run my event follow-up campaign\"", "F0ABR2RJQUE": "Customer IB PipeGen - Scrappy plays", "F0A9Q54S9GD": "Customer IB PipeGen - Cloud plays", "F0A95NV3L5R": "Deal Progression Framework → \"Run my deal progression analysis\"", "F0AMETZBUGP": "Business Case Generation", "F0AJ9T0SECU": "VP Framework (Core)", "F09V9RTRAUQ": "First Line Manager Execution", "F0A99FUAA6A": "Account Health Analysis", "F0ACG8LDMUK": "Quota Attainment Planning", "F0AFAGS1ZV0": "Freshman & Sophomore Accounts Create and Close Plays", "F0AM15SK1RD": "PipeGen for Core AEs - Revenue Cloud", "F0AMEGSCTDL": "PipeGen for Core AEs - Commerce Cloud", "F0ANATLEN0Y": "PipeGen for Core AEs - Digital (TBC)", "F0AE8V9N3C1": "AE Territory Tiering & Profiling", "F09SLCQ69P0": "Daily Command Centre → \"Run my daily command centre\""};
+    /**
+     * From JTBD CSV: Canvas column + Target (AE, FLM, SE, or rows containing “Specialist”).
+     * Re-export CSV and regenerate this object when the list changes.
+     */
+    window.CANVAS_IDS_BY_CHANNEL = {
+      usage: [
+        "F09KQMSSX2T",
+        "F09SLCQ69P0",
+        "F09V9RTRAUQ",
+        "F0A1AV6H11D",
+        "F0A617J4HME",
+        "F0A8T3HMHM3",
+        "F0A95NV3L5R",
+        "F0A99FUAA6A",
+        "F0A9Q54S9GD",
+        "F0ABR2RJQUE",
+        "F0ACG8LDMUK",
+        "F0ACT8V5E4V",
+        "F0ADD0M2X61",
+        "F0ADMNU26G3",
+        "F0ADV2YHQM8",
+        "F0ADWD7V35Z",
+        "F0AE8V9N3C1",
+        "F0AEKQB4F39",
+        "F0AELSJ8G8N",
+        "F0AEP8ZP7EC",
+        "F0AFAGS1ZV0",
+        "F0AJ9T0SECU",
+        "F0AJMFZ6R51",
+        "F0AKD70G3ND",
+        "F0AKHU4GYDT",
+        "F0AKKFYHQMC",
+        "F0AL2LSKG2F",
+        "F0ALEU6JX38",
+        "F0ALMGU418Q",
+        "F0AM15SK1RD",
+        "F0AMEGSCTDL",
+        "F0AMETZBUGP",
+        "F0AMV6UCG4R",
+        "F0ANATLEN0Y",
+        "F0AQAET6NAX",
+        "F0AQNR9SB28",
+        "F0AR6HZEDEY"
+      ],
+      ae: [
+        "F09KQMSSX2T",
+        "F09SLCQ69P0",
+        "F0A1AV6H11D",
+        "F0A617J4HME",
+        "F0A8T3HMHM3",
+        "F0A95NV3L5R",
+        "F0A99FUAA6A",
+        "F0A9Q54S9GD",
+        "F0ABR2RJQUE",
+        "F0ACG8LDMUK",
+        "F0ACT8V5E4V",
+        "F0ADD0M2X61",
+        "F0ADMNU26G3",
+        "F0ADV2YHQM8",
+        "F0ADWD7V35Z",
+        "F0AE8V9N3C1",
+        "F0AEKQB4F39",
+        "F0AELSJ8G8N",
+        "F0AEP8ZP7EC",
+        "F0AFAGS1ZV0",
+        "F0AJ9T0SECU",
+        "F0AJMFZ6R51",
+        "F0AKD70G3ND",
+        "F0AKKFYHQMC",
+        "F0AL2LSKG2F",
+        "F0ALMGU418Q",
+        "F0AM15SK1RD",
+        "F0AMEGSCTDL",
+        "F0AMETZBUGP",
+        "F0AMV6UCG4R",
+        "F0ANATLEN0Y",
+        "F0AQAET6NAX",
+        "F0AQNR9SB28",
+        "F0AR6HZEDEY"
+      ],
+      flm: ["F09V9RTRAUQ"],
+      se: ["F0AKHU4GYDT", "F0ALEU6JX38"],
+      specialist: []
+    };
+  </script>
+  <script>
+    (function () {
+      var LS_CHIP_MODE = "tigerTeamCanvasChipMode";
+      var chipMode = localStorage.getItem(LS_CHIP_MODE) || "id";
+      var lastCanvasIds = [];
+      /** Which Canvas IDs are included in the Tableau URL filter (all true after channel change). */
+      var selectedCanvasIds = {};
+      var canvasSearchQuery = "";
+
+      var ROLE_INTRO = {
+        ae:
+          "JTBD list rows where <strong>Target</strong> = <strong>AE</strong>. The Tableau view below is filtered to these Canvas IDs only. <strong>#usage-stats</strong> applies the full JTBD list (all targets).",
+        flm:
+          "Rows where <strong>Target</strong> = <strong>FLM</strong>. The viz is filtered to this Canvas ID.",
+        se:
+          "Rows where <strong>Target</strong> = <strong>SE</strong>. The viz is filtered to these Canvas IDs.",
+        specialist:
+          "Rows where <strong>Target</strong> contains <strong>Specialist</strong>. <em>Your current CSV has no Specialist Canvas IDs</em> — add rows in Slack, re-export, and update <code>CANVAS_IDS_BY_CHANNEL.specialist</code>; until then there is nothing to filter the dashboard on."
+      };
+
+      var CANVAS_HEADING = {
+        usage: "All canvases (A–Z)",
+        ae: "AE (Target = AE)",
+        flm: "FLM (Target = FLM)",
+        se: "SE (Target = SE)",
+        specialist: "Specialist"
+      };
+
+      function canvasNameForId(id) {
+        var map = window.CANVAS_ID_TO_NAME || {};
+        return map[id] || "";
+      }
+
+      /** Canvas ID order for this page and for the Tableau URL filter (A→Z, numeric-aware). */
+      function sortCanvasIdsLex(ids) {
+        if (!ids || !ids.length) return [];
+        return ids
+          .slice()
+          .map(function (x) {
+            return String(x).trim();
+          })
+          .sort(function (a, b) {
+            /* A→Z string order; numeric: true aligns IDs like F10 after F9 where digits participate */
+            return a.localeCompare(b, undefined, {
+              sensitivity: "base",
+              numeric: true
+            });
+          });
+      }
+
+      function updateCanvasLegendAndToggle() {
+        var leg = document.getElementById("canvas-legend-text");
+        var btnId = document.getElementById("canvas-toggle-id");
+        var btnName = document.getElementById("canvas-toggle-name");
+        if (leg) {
+          if (chipMode === "name") {
+            leg.textContent =
+              "Name first, then ID · search · checkboxes filter the dashboard · Tableau URL uses Canvas ID A→Z.";
+          } else {
+            leg.textContent =
+              "ID first, then name · search · checkboxes filter the dashboard · Tableau URL uses Canvas ID A→Z.";
+          }
+        }
+        if (btnId && btnName) {
+          btnId.classList.toggle("is-active", chipMode === "id");
+          btnName.classList.toggle("is-active", chipMode === "name");
+          btnId.setAttribute("aria-pressed", chipMode === "id" ? "true" : "false");
+          btnName.setAttribute("aria-pressed", chipMode === "name" ? "true" : "false");
+        }
+      }
+
+      function resetCanvasSelection() {
+        selectedCanvasIds = {};
+        lastCanvasIds.forEach(function (id) {
+          selectedCanvasIds[id] = true;
+        });
+      }
+
+      function rowMatchesSearch(id, query) {
+        var q = (query || "").trim().toLowerCase();
+        if (!q) return true;
+        var name = (canvasNameForId(id) || "").toLowerCase();
+        return String(id).toLowerCase().indexOf(q) !== -1 || name.indexOf(q) !== -1;
+      }
+
+      function updateApplySearchButtonState() {
+        var btn = document.getElementById("canvas-apply-search-btn");
+        if (!btn) return;
+        var has = (canvasSearchQuery || "").trim().length > 0;
+        btn.disabled = !has;
+      }
+
+      /** Narrow Tableau to canvases matching the search (e.g. type F09, then click). */
+      function applySearchToTableau() {
+        var q = (canvasSearchQuery || "").trim();
+        if (!q) return;
+        lastCanvasIds.forEach(function (id) {
+          selectedCanvasIds[id] = rowMatchesSearch(id, q);
+        });
+        var any = lastCanvasIds.some(function (id) {
+          return selectedCanvasIds[id];
+        });
+        if (!any) resetCanvasSelection();
+        renderCanvasIdChips(lastCanvasIds, false);
+        applyTableau(getFilterIdsForTableau());
+      }
+
+      function getFilterIdsForTableau() {
+        var out = [];
+        lastCanvasIds.forEach(function (id) {
+          if (selectedCanvasIds[id]) out.push(id);
+        });
+        return sortCanvasIdsLex(out);
+      }
+
+      function updateSelectionSummary() {
+        var el = document.getElementById("canvas-selection-summary");
+        if (!el) return;
+        var total = lastCanvasIds.length;
+        if (total === 0) {
+          el.textContent = "";
+          return;
+        }
+        var sel = 0;
+        lastCanvasIds.forEach(function (id) {
+          if (selectedCanvasIds[id]) sel++;
+        });
+        if (sel === total) {
+          el.textContent = "Dashboard: all " + total + " canvases";
+        } else {
+          el.textContent = "Dashboard: " + sel + " of " + total + " selected";
+        }
+      }
+
+      function renderCanvasIdChips(ids, resetSelection) {
+        lastCanvasIds = sortCanvasIdsLex(ids || []);
+        if (resetSelection) {
+          resetCanvasSelection();
+          canvasSearchQuery = "";
+          var searchEl = document.getElementById("canvas-search-input");
+          if (searchEl) searchEl.value = "";
+        }
+        var list = lastCanvasIds;
+        var ul = document.getElementById("canvas-id-list");
+        var empty = document.getElementById("canvas-ids-empty");
+        var filterBar = document.getElementById("canvas-filter-toolbar");
+        if (!ul || !empty) return;
+        ul.innerHTML = "";
+        updateCanvasLegendAndToggle();
+        if (list.length === 0) {
+          empty.hidden = false;
+          if (filterBar) filterBar.hidden = true;
+          updateApplySearchButtonState();
+          return;
+        }
+        empty.hidden = true;
+        if (filterBar) filterBar.hidden = false;
+
+        list.forEach(function (rawId) {
+          var id = String(rawId).trim();
+          var name = canvasNameForId(id);
+          var displayName = name || "No title in export — see Canvas ID";
+
+          var li = document.createElement("li");
+          li.className =
+            "canvas-card canvas-card--" + (chipMode === "name" ? "name-first" : "id-first");
+          li.hidden = !rowMatchesSearch(id, canvasSearchQuery);
+          li.setAttribute(
+            "aria-label",
+            (name || "Canvas") + ", Canvas ID " + id
+          );
+
+          var cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.className = "canvas-card__check";
+          cb.checked = !!selectedCanvasIds[id];
+          cb.setAttribute("aria-label", "Include " + id + " in Tableau filter");
+          cb.addEventListener("change", function () {
+            if (!cb.checked) {
+              var others = 0;
+              lastCanvasIds.forEach(function (xid) {
+                if (xid !== id && selectedCanvasIds[xid]) others++;
+              });
+              if (others === 0) {
+                cb.checked = true;
+                return;
+              }
+            }
+            selectedCanvasIds[id] = cb.checked;
+            applyTableau(getFilterIdsForTableau());
+            updateSelectionSummary();
+          });
+
+          var idSpan = document.createElement("span");
+          idSpan.className =
+            "canvas-card__id" + (chipMode === "id" ? " canvas-card__id--emphasis" : "");
+          idSpan.textContent = id;
+
+          var tName = document.createElement("span");
+          if (chipMode === "name") {
+            tName.className = "canvas-card__title canvas-card__title--lead";
+            tName.textContent = displayName;
+            li.appendChild(cb);
+            li.appendChild(tName);
+            li.appendChild(idSpan);
+          } else {
+            tName.className = "canvas-card__title canvas-card__title--muted";
+            tName.textContent = name || "—";
+            li.appendChild(cb);
+            li.appendChild(idSpan);
+            li.appendChild(tName);
+          }
+
+          ul.appendChild(li);
+        });
+
+        updateSelectionSummary();
+        updateApplySearchButtonState();
+      }
+
+      var base =
+        "https://prod-uswest-c.online.tableau.com/t/salesforce/views/IndividualCanvasUsage/GridView/8e537e0e-cb7e-465c-9d57-a3daf3ee72e0/944df2aa-b2c3-4243-bc7e-fadd696faec8";
+      var frame = document.getElementById("tableau-frame");
+      var linkEl = document.getElementById("tableau-open-link");
+
+      function buildTableauSrc(ids) {
+        var field = window.TABLEAU_CANVAS_FILTER_FIELD || "Canvas ID";
+        var sorted = sortCanvasIdsLex(ids || []);
+        /* Embed options: &:… View filters: plain &Field=… per embed_filter_add.htm */
+        var q = "?:embed=y&:showAppBanner=false&:hide_tabs=false&:toolbar=top";
+        if (sorted.length === 0) return base + q;
+        var key = encodeURIComponent(field);
+        var style = window.TABLEAU_CANVAS_FILTER_STYLE || "comma";
+        if (style === "repeat") {
+          sorted.forEach(function (id) {
+            q += "&" + key + "=" + encodeURIComponent(id);
+          });
+        } else {
+          /* One filter param; comma-separated values; encode each ID for safe parsing */
+          q +=
+            "&" +
+            key +
+            "=" +
+            sorted
+              .map(function (id) {
+                return encodeURIComponent(id);
+              })
+              .join(",");
+        }
+        return base + q;
+      }
+
+      function applyTableau(ids) {
+        var url = buildTableauSrc(ids);
+        if (frame) frame.src = url;
+        if (linkEl) linkEl.href = url;
+      }
+
+      var navItems = document.querySelectorAll(".nav-item[data-channel]");
+      var panelAbout = document.getElementById("panel-about");
+      var panelTableau = document.getElementById("panel-tableau");
+      var titleEl = document.getElementById("channel-title");
+      var badgeEl = document.getElementById("channel-badge");
+      var noteEl = document.getElementById("tableau-note");
+      var usageIntro = document.getElementById("usage-intro-section");
+      var roleIntro = document.getElementById("role-intro-section");
+      var roleIntroText = document.getElementById("role-intro-text");
+      var embedStack = document.getElementById("embed-stack");
+      var canvasHeading = document.getElementById("canvas-ids-heading");
+      var tableauNoFilterNote = document.getElementById("tableau-no-filter-note");
+
+      var btnChipId = document.getElementById("canvas-toggle-id");
+      var btnChipName = document.getElementById("canvas-toggle-name");
+      if (btnChipId && btnChipName) {
+        btnChipId.addEventListener("click", function () {
+          chipMode = "id";
+          localStorage.setItem(LS_CHIP_MODE, chipMode);
+          renderCanvasIdChips(lastCanvasIds, false);
+        });
+        btnChipName.addEventListener("click", function () {
+          chipMode = "name";
+          localStorage.setItem(LS_CHIP_MODE, chipMode);
+          renderCanvasIdChips(lastCanvasIds, false);
+        });
+      }
+
+      var canvasSearchInput = document.getElementById("canvas-search-input");
+      if (canvasSearchInput) {
+        canvasSearchInput.addEventListener("input", function () {
+          canvasSearchQuery = canvasSearchInput.value || "";
+          renderCanvasIdChips(lastCanvasIds, false);
+        });
+      }
+
+      var canvasApplySearchBtn = document.getElementById("canvas-apply-search-btn");
+      if (canvasApplySearchBtn) {
+        canvasApplySearchBtn.addEventListener("click", function () {
+          applySearchToTableau();
+        });
+      }
+
+      var canvasSelectAllBtn = document.getElementById("canvas-select-all-btn");
+      if (canvasSelectAllBtn) {
+        canvasSelectAllBtn.addEventListener("click", function () {
+          lastCanvasIds.forEach(function (id) {
+            selectedCanvasIds[id] = true;
+          });
+          renderCanvasIdChips(lastCanvasIds, false);
+          applyTableau(getFilterIdsForTableau());
+        });
+      }
+
+      var byCh = window.CANVAS_IDS_BY_CHANNEL || {};
+
+      function setChannel(channel) {
+        var isAbout = channel === "about";
+        var isUsage = channel === "usage";
+        var isRole = channel === "ae" || channel === "flm" || channel === "se" || channel === "specialist";
+
+        panelAbout.hidden = !isAbout;
+        panelTableau.hidden = isAbout;
+
+        navItems.forEach(function (btn) {
+          btn.classList.toggle("active", btn.getAttribute("data-channel") === channel);
+        });
+
+        if (isAbout) {
+          titleEl.textContent = "# about-us";
+          badgeEl.textContent = "Canvas";
+          return;
+        }
+
+        if (usageIntro) usageIntro.hidden = !isUsage;
+        if (roleIntro) roleIntro.hidden = isUsage;
+        if (roleIntroText && isRole) {
+          roleIntroText.innerHTML = ROLE_INTRO[channel] || "";
+        }
+
+        if (canvasHeading) {
+          canvasHeading.textContent = CANVAS_HEADING[channel] || "Canvases";
+        }
+
+        var ids = [];
+        if (isUsage) {
+          ids = byCh.usage || [];
+          titleEl.textContent = "# usage-stats";
+          badgeEl.textContent = "Tableau";
+        } else if (isRole) {
+          ids = byCh[channel] || [];
+          titleEl.textContent = "# " + channel;
+          badgeEl.textContent = "Tableau";
+        }
+
+        renderCanvasIdChips(ids, true);
+
+        var canFilter = ids.length > 0;
+        if (tableauNoFilterNote) tableauNoFilterNote.hidden = canFilter;
+        if (embedStack) embedStack.hidden = !canFilter;
+        if (linkEl) linkEl.hidden = !canFilter;
+        if (noteEl) noteEl.hidden = !canFilter;
+
+        if (canFilter) {
+          applyTableau(getFilterIdsForTableau());
+        } else if (frame) {
+          frame.removeAttribute("src");
+          if (linkEl) linkEl.href = base;
+        }
+      }
+
+      navItems.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          setChannel(btn.getAttribute("data-channel"));
+        });
+      });
+
+      updateCanvasLegendAndToggle();
+      setChannel("about");
+    })();
+  </script>
+</body>
+</html>
