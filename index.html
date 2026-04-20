@@ -6,7 +6,25 @@
   <title>EMEA SMB Slackbot Tiger Team</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <!-- Warm DNS + TLS to Tableau Cloud so the viz loads sooner after you open Usage -->
+  <link rel="preconnect" href="https://prod-uswest-c.online.tableau.com" crossorigin />
+  <script
+    type="module"
+    src="https://prod-uswest-c.online.tableau.com/javascripts/api/tableau.embedding.3.latest.min.js"
+  ></script>
+  <!-- Non-blocking font CSS: first paint uses fallbacks; fonts swap in when ready -->
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+    media="print"
+    onload="this.media='all'"
+  />
+  <noscript>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+    />
+  </noscript>
   <style>
     :root {
       --slack-sidebar: #350d36;
@@ -242,7 +260,7 @@
       min-height: 0;
     }
 
-    /* Usage / Tableau: stack by content height and scroll inside .content (don’t squeeze the iframe) */
+    /* Usage / Tableau: stack by content height and scroll inside .content (don’t squeeze the viz) */
     #panel-tableau {
       gap: 14px;
       flex: 0 0 auto;
@@ -354,12 +372,14 @@
       background: #0b0c0e;
     }
 
-    .embed-frame-wrap iframe {
+    .embed-frame-wrap iframe,
+    .embed-frame-wrap tableau-viz {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       border: 0;
+      display: block;
     }
 
     #panel-tableau .embed-stack {
@@ -367,7 +387,7 @@
       width: 100%;
     }
 
-    /* Tall iframe; page scrolls in .content so intro + canvas list + dashboard are all reachable */
+    /* Tall embed; page scrolls in .content so intro + canvas list + dashboard are all reachable */
     #panel-tableau .embed-frame-wrap {
       flex: 0 0 auto;
       min-height: clamp(640px, 75vh, 1400px);
@@ -417,6 +437,7 @@
       overflow-x: hidden;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      contain: content;
     }
 
     .canvas-chips-toolbar {
@@ -1080,6 +1101,10 @@
           <span class="nav-hash">#</span>
           <span class="nav-label">usage-stats</span>
         </button>
+        <button type="button" class="nav-item" data-channel="skills" title="skills">
+          <span class="nav-hash">#</span>
+          <span class="nav-label">skills</span>
+        </button>
         <div class="nav-section-label">JTBD by role</div>
         <button type="button" class="nav-item" data-channel="ae" title="ae">
           <span class="nav-hash">#</span>
@@ -1113,7 +1138,7 @@
         <a
           class="topbar-link"
           id="tableau-open-link"
-          href="https://prod-uswest-c.online.tableau.com/t/salesforce/views/IndividualCanvasUsage/GridView/8e537e0e-cb7e-465c-9d57-a3daf3ee72e0/944df2aa-b2c3-4243-bc7e-fadd696faec8"
+          href="https://prod-uswest-c.online.tableau.com/t/salesforce/views/IndividualCanvasUsage/GridView/57b0d26f-c991-4fbd-a7a4-98802a4d2a22/SLACKBOTPROMPTS"
           target="_blank"
           rel="noopener noreferrer"
           hidden
@@ -1295,7 +1320,7 @@
               <li>Context for programmes like Prompt Clinics and pilots: are the right people in the habit?</li>
             </ul>
             <p style="margin-top: 12px; font-size: 13px; color: var(--slack-muted)">
-              The embedded view is URL-filtered on the <strong>Canvas ID</strong> dimension (same IDs as below). Use in-viz controls for dates and other fields.
+              The embedded view is filtered on the <strong>Canvas ID</strong> dimension via the Tableau Embedding API (same IDs as below), without reloading the whole viz when you change checkboxes. Use in-viz controls for dates and other fields.
             </p>
           </section>
 
@@ -1307,7 +1332,7 @@
             <h3 id="canvas-ids-heading">Canvases</h3>
             <div class="canvas-chips-toolbar">
               <p class="canvas-legend" id="canvas-legend-text" role="note">
-                ID first, then name · search · checkboxes filter the dashboard · Tableau URL uses Canvas ID A→Z.
+                ID first, then name · search · checkboxes filter the dashboard · Canvas ID order A→Z matches the filter applied to Tableau.
               </p>
               <div class="canvas-toggle-group" role="group" aria-label="Emphasize name or ID">
                 <button type="button" class="canvas-toggle-btn is-active" id="canvas-toggle-id" aria-pressed="true">
@@ -1336,8 +1361,8 @@
               </div>
               <div class="canvas-filter-meta">
                 <span class="canvas-selection-summary" id="canvas-selection-summary" aria-live="polite"></span>
-                <button type="button" class="canvas-filter-btn" id="canvas-apply-search-btn" disabled title="Select only rows that match the search and reload Tableau">
-                  Use search in dashboard
+                <button type="button" class="canvas-filter-btn" id="canvas-apply-search-btn" disabled title="Select only rows that match the search and update the Tableau filter">
+                  Submit search
                 </button>
                 <button type="button" class="canvas-filter-btn" id="canvas-select-all-btn">
                   Select all
@@ -1351,28 +1376,30 @@
           </section>
 
           <p class="tableau-filter-note" id="tableau-no-filter-note" hidden style="margin: 0 0 8px; font-size: 13px; color: var(--slack-muted)">
-            No Canvas IDs for this channel — nothing to pass into the Tableau URL filter.
+            No Canvas IDs for this channel — nothing to pass into the Tableau filter.
           </p>
           <div class="embed-stack" id="embed-stack">
             <div class="embed-card">
               <div class="embed-toolbar">
-                <strong>Grid view</strong>
+                <strong id="tableau-embed-view-label">Grid view</strong>
                 <span>·</span>
-                <span>Individual Canvas Usage</span>
+                <span id="tableau-embed-workbook-label">Individual Canvas Usage</span>
               </div>
               <div class="embed-frame-wrap">
-                <iframe
-                  id="tableau-frame"
+                <tableau-viz
+                  id="tableau-viz"
                   title="Tableau: Individual Canvas Usage"
-                  loading="lazy"
-                  referrerpolicy="strict-origin-when-cross-origin"
-                  allowfullscreen
-                ></iframe>
+                  src="https://prod-uswest-c.online.tableau.com/t/salesforce/views/IndividualCanvasUsage/GridView/57b0d26f-c991-4fbd-a7a4-98802a4d2a22/SLACKBOTPROMPTS"
+                  width="100%"
+                  height="100%"
+                  hide-tabs
+                  toolbar="bottom"
+                ></tableau-viz>
               </div>
             </div>
             <p class="embed-note" id="tableau-note">
-              <strong>Same order as this page:</strong> Canvas IDs are sent in <strong>A→Z</strong> order in the URL (string sort with numeric segments). The <strong>row order inside the grid</strong> is controlled in the published workbook — ask the owner to sort the sheet by <strong>Canvas ID</strong> ascending so the viz matches this list. If Tableau’s own filter list is hard to scroll (e.g. to reach IDs starting with <code>F09</code>), type <code>F09</code> above and click <strong>Use search in dashboard</strong> to pass only matching IDs.
-              <span class="embed-note__more">Use <code>TABLEAU_CANVAS_FILTER_STYLE = "comma"</code> so all IDs are sent in one filter. <a href="https://help.tableau.com/current/pro/desktop/en-us/embed_filter_add.htm" target="_blank" rel="noopener noreferrer">Tableau: Add filters to embed code</a>.</span>
+              <strong>Same order as this page:</strong> Canvas IDs are applied to the viz in <strong>A→Z</strong> order (string sort with numeric segments). The <strong>row order inside the grid</strong> is controlled in the published workbook — ask the owner to sort the sheet by <strong>Canvas ID</strong> ascending so the viz matches this list. If Tableau’s own filter list is hard to scroll (e.g. to reach IDs starting with <code>F09</code>), type <code>F09</code> above and click <strong>Use search in dashboard</strong> to narrow the embedded filter to matching IDs only.
+              <span class="embed-note__more"><strong>Open in Tableau</strong> still uses URL view filters. If that link misses rows, try <code>TABLEAU_CANVAS_FILTER_USE_VF_PREFIX = true</code> or <code>TABLEAU_CANVAS_FILTER_STYLE = "filter-param"</code>. Embedding uses <code>applyFilterAsync</code> on the sheet named <code>TABLEAU_EMBED_FILTER_WORKSHEET</code> (default <code>SLACKBOTPROMPTS</code> on a dashboard). <a href="https://help.tableau.com/current/api/embedding_api/en-us/docs/embedding_api_filter.html" target="_blank" rel="noopener noreferrer">Tableau Embedding API: Filter the view</a>.</span>
             </p>
           </div>
         </div>
@@ -1385,18 +1412,37 @@
     /** Tableau dimension used in URL filters — matches the workbook field **Canvas ID**. */
     window.TABLEAU_CANVAS_FILTER_FIELD = "Canvas ID";
     /**
+     * If true, use vf_Canvas%20ID=… (view-filter style). Try true only if comma style misses rows (e.g. F09*).
+     * Default false — standard “Open in Tableau” URL uses Canvas%20ID=… per Tableau embed filter docs.
+     */
+    window.TABLEAU_CANVAS_FILTER_USE_VF_PREFIX = false;
+    /**
      * How to pass multiple Canvas IDs to the viz URL:
-     * - "comma" — one param: Canvas%20ID=id1,id2,… (Tableau documented; use this for multi-select).
-     * - "repeat" — repeated query keys (NOT recommended: Tableau Cloud often applies only ONE value, e.g. the first).
+     * - "comma" — one param: …&Canvas%20ID=id1,id2 (values NOT per-encoded; commas separate members).
+     * - "filter-param" — …&filter=Canvas%20ID%3Did1%2Cid2 (older single filter= string; try if comma fails).
+     * - "repeat" — …&Canvas%20ID=id1&Canvas%20ID=id2 (some builds only keep one value).
      */
     window.TABLEAU_CANVAS_FILTER_STYLE = "comma";
+    /**
+     * When true (default), adds &:highdpi=false so Tableau uses standard DPI on retina — often faster; set false for sharper viz on dense displays.
+     */
+    window.TABLEAU_EMBED_STANDARD_DPI = true;
+    /**
+     * Worksheet name on the embedded dashboard used for applyFilterAsync / clearFilterAsync.
+     * Must match a sheet tab in the published workbook (this page embeds SLACKBOTPROMPTS).
+     */
+    window.TABLEAU_EMBED_FILTER_WORKSHEET = "SLACKBOTPROMPTS";
+    /** Debounce (ms) before applying the Canvas ID filter via the Embedding API; 0 = immediate. */
+    window.TABLEAU_APPLY_DEBOUNCE_MS = 400;
+    /** Debounce (ms) for canvas search list repaint while typing. */
+    window.CANVAS_SEARCH_DEBOUNCE_MS = 120;
     window.TIGER_TEAM_SLACK_LIST = {
       url: "https://salesforce.enterprise.slack.com/lists/T5J4Q04QG/F0AC2BAGT0C",
       teamId: "T5J4Q04QG",
       listId: "F0AC2BAGT0C"
     };
-    /** JTBD “Name” column keyed by Canvas file id (from CSV export). */
-    window.CANVAS_ID_TO_NAME = {"F0ADMNU26G3": "Day 1 Open Pipe Analysis (M&Q)", "F0AR6HZEDEY": "PipeGen for Agentforce & D360", "F0AELSJ8G8N": "AE Daily Command Centre", "F0AJMFZ6R51": "Progression and Pull Forward", "F0AKD70G3ND": "Marketing / Events Play", "F0AKHU4GYDT": "SE TOR", "F0AL2LSKG2F": "LD/MD Strat SE Review", "F0ALEU6JX38": "SE Scorecard Generator", "F0AQNR9SB28": "PipeGen for Slack", "F0AEKQB4F39": "Deal Review", "F0ADV2YHQM8": "AE Slackbot Prompts Collection", "F0AQAET6NAX": "FLM Slackbot Prompts Collection", "F0AKKFYHQMC": "SE Slackbot Prompts Collection", "F0AMV6UCG4R": "PipeGen for Platform", "F0ADWD7V35Z": "AE Territory Tiering & Profiling", "F0AEP8ZP7EC": "AOV Protection and Expansion", "F0ACT8V5E4V": "Account Handover", "F0ALMGU418Q": "Big Bet Account Strategy", "F0A8T3HMHM3": "Analyse My Timeperiod Pipeline", "F0ADD0M2X61": "Monthly / Quarterly Forecast Plan → \"Run my monthly forecast analysis\"", "F09KQMSSX2T": "Week Wrap & 1:1 Prep → \"Run my week wrap and 1:1 agenda\"", "F0A617J4HME": "New Logo Deal Execution", "F0A1AV6H11D": "Event / World Tour Follow-ups → \"Run my event follow-up campaign\"", "F0ABR2RJQUE": "Customer IB PipeGen - Scrappy plays", "F0A9Q54S9GD": "Customer IB PipeGen - Cloud plays", "F0A95NV3L5R": "Deal Progression Framework → \"Run my deal progression analysis\"", "F0AMETZBUGP": "Business Case Generation", "F0AJ9T0SECU": "VP Framework (Core)", "F09V9RTRAUQ": "First Line Manager Execution", "F0A99FUAA6A": "Account Health Analysis", "F0ACG8LDMUK": "Quota Attainment Planning", "F0AFAGS1ZV0": "Freshman & Sophomore Accounts Create and Close Plays", "F0AM15SK1RD": "PipeGen for Core AEs - Revenue Cloud", "F0AMEGSCTDL": "PipeGen for Core AEs - Commerce Cloud", "F0ANATLEN0Y": "PipeGen for Core AEs - Digital (TBC)", "F0AE8V9N3C1": "AE Territory Tiering & Profiling", "F09SLCQ69P0": "Daily Command Centre → \"Run my daily command centre\""};
+    /** JTBD “Name” column keyed by Canvas file id (from CSV export); includes SMB EMEA Skill canvases (names without the “SMB EMEA Skill - ” prefix). */
+    window.CANVAS_ID_TO_NAME = {"F0ADMNU26G3": "Day 1 Open Pipe Analysis (M&Q)", "F0AR6HZEDEY": "PipeGen for Agentforce & D360", "F0AELSJ8G8N": "AE Daily Command Centre", "F0AJMFZ6R51": "Progression and Pull Forward", "F0AKD70G3ND": "Marketing / Events Play", "F0AKHU4GYDT": "SE TOR", "F0AL2LSKG2F": "LD/MD Strat SE Review", "F0ALEU6JX38": "SE Scorecard Generator", "F0AQNR9SB28": "PipeGen for Slack", "F0AEKQB4F39": "Deal Review", "F0ADV2YHQM8": "AE Slackbot Prompts Collection", "F0AQAET6NAX": "FLM Slackbot Prompts Collection", "F0AKKFYHQMC": "SE Slackbot Prompts Collection", "F0AMV6UCG4R": "PipeGen for Platform", "F0ADWD7V35Z": "AE Territory Tiering & Profiling", "F0AEP8ZP7EC": "AOV Protection and Expansion", "F0ACT8V5E4V": "Account Handover", "F0ALMGU418Q": "Big Bet Account Strategy", "F0A8T3HMHM3": "Analyse My Timeperiod Pipeline", "F0ADD0M2X61": "Monthly / Quarterly Forecast Plan → \"Run my monthly forecast analysis\"", "F09KQMSSX2T": "Week Wrap & 1:1 Prep → \"Run my week wrap and 1:1 agenda\"", "F0A617J4HME": "New Logo Deal Execution", "F0A1AV6H11D": "Event / World Tour Follow-ups → \"Run my event follow-up campaign\"", "F0ABR2RJQUE": "Customer IB PipeGen - Scrappy plays", "F0A9Q54S9GD": "Customer IB PipeGen - Cloud plays", "F0A95NV3L5R": "Deal Progression Framework → \"Run my deal progression analysis\"", "F0AMETZBUGP": "Business Case Generation", "F0AJ9T0SECU": "VP Framework (Core)", "F09V9RTRAUQ": "First Line Manager Execution", "F0A99FUAA6A": "Account Health Analysis", "F0ACG8LDMUK": "Quota Attainment Planning", "F0AFAGS1ZV0": "Freshman & Sophomore Accounts Create and Close Plays", "F0AM15SK1RD": "PipeGen for Core AEs - Revenue Cloud", "F0AMEGSCTDL": "PipeGen for Core AEs - Commerce Cloud", "F0ANATLEN0Y": "PipeGen for Core AEs - Digital (TBC)", "F0AE8V9N3C1": "AE Territory Tiering & Profiling", "F09SLCQ69P0": "Daily Command Centre → \"Run my daily command centre\"", "F0A8U2ATL8N": "Find org62 user ID and Identify Hierarchy", "F0A5BHKHFT6": "Find Org62 User ID", "F0AB00F2ZND": "Query opportunities for user", "F0ABFHZJT3J": "Query opportunities By Names or IDs", "F0A51PX5Z0T": "Find opportunity Slack Channel", "F0A5EC6UX7C": "Analyse Slack Channel content and transcripts", "F0A90QAFKDF": "Query Opportunities by Specialist forecast", "F0AACJ668D8": "Get Install Base Accounts", "F0ABC67UN5P": "Gather Product Sales Intelligence", "F0AABV1444B": "Query Asset Line Items by Product Pattern", "F0AA31XMTNW": "Get Total Portfolio Accounts", "F0AAFE04DPB": "Get L2 Product Adoption", "F0AAT71M127": "Query Asset Line Items by Product Pattern with Quantities", "F0AAFNY2GC8": "Get Usage Metrics for Record Type", "F0AAXF7DJ6A": "Find CRM Analytics Customers Without Tableau", "F0AA32QLU3U": "Get Service Cloud Customers & Case Volume"};
     /**
      * From JTBD CSV: Canvas column + Target (AE, FLM, SE, or rows containing “Specialist”).
      * Re-export CSV and regenerate this object when the list changes.
@@ -1479,7 +1525,25 @@
       ],
       flm: ["F09V9RTRAUQ"],
       se: ["F0AKHU4GYDT", "F0ALEU6JX38"],
-      specialist: []
+      specialist: [],
+      skills: [
+        "F0A51PX5Z0T",
+        "F0A5BHKHFT6",
+        "F0A5EC6UX7C",
+        "F0A8U2ATL8N",
+        "F0A90QAFKDF",
+        "F0AA31XMTNW",
+        "F0AA32QLU3U",
+        "F0AAFE04DPB",
+        "F0AAT71M127",
+        "F0AABV1444B",
+        "F0AACJ668D8",
+        "F0AAFNY2GC8",
+        "F0AAXF7DJ6A",
+        "F0AB00F2ZND",
+        "F0ABC67UN5P",
+        "F0ABFHZJT3J"
+      ]
     };
   </script>
   <script>
@@ -1487,7 +1551,7 @@
       var LS_CHIP_MODE = "tigerTeamCanvasChipMode";
       var chipMode = localStorage.getItem(LS_CHIP_MODE) || "id";
       var lastCanvasIds = [];
-      /** Which Canvas IDs are included in the Tableau URL filter (all true after channel change). */
+      /** Which Canvas IDs are included in the Tableau Canvas ID filter (all true after channel change). */
       var selectedCanvasIds = {};
       var canvasSearchQuery = "";
 
@@ -1499,11 +1563,14 @@
         se:
           "Rows where <strong>Target</strong> = <strong>SE</strong>. The viz is filtered to these Canvas IDs.",
         specialist:
-          "Rows where <strong>Target</strong> contains <strong>Specialist</strong>. <em>Your current CSV has no Specialist Canvas IDs</em> — add rows in Slack, re-export, and update <code>CANVAS_IDS_BY_CHANNEL.specialist</code>; until then there is nothing to filter the dashboard on."
+          "Rows where <strong>Target</strong> contains <strong>Specialist</strong>. <em>Your current CSV has no Specialist Canvas IDs</em> — add rows in Slack, re-export, and update <code>CANVAS_IDS_BY_CHANNEL.specialist</code>; until then there is nothing to filter the dashboard on.",
+        skills:
+          "Each item below is an <strong>SMB EMEA Skill</strong> Slack canvas. The Tableau view is filtered on <strong>Canvas ID</strong> (the file id at the end of each canvas URL, e.g. <code>F0A5BHKHFT6</code>). Display names drop the <strong>SMB EMEA Skill -</strong> prefix."
       };
 
       var CANVAS_HEADING = {
         usage: "All canvases (A–Z)",
+        skills: "SMB EMEA Skill canvases (A–Z)",
         ae: "AE (Target = AE)",
         flm: "FLM (Target = FLM)",
         se: "SE (Target = SE)",
@@ -1515,13 +1582,19 @@
         return map[id] || "";
       }
 
-      /** Canvas ID order for this page and for the Tableau URL filter (A→Z, numeric-aware). */
+      function sanitizeCanvasId(id) {
+        return String(id || "")
+          .trim()
+          .replace(/[\u200b-\u200d\ufeff\u00a0]/g, "");
+      }
+
+      /** Canvas ID order for this page and for the Tableau filter (A→Z, numeric-aware). */
       function sortCanvasIdsLex(ids) {
         if (!ids || !ids.length) return [];
         return ids
           .slice()
           .map(function (x) {
-            return String(x).trim();
+            return sanitizeCanvasId(x);
           })
           .sort(function (a, b) {
             /* A→Z string order; numeric: true aligns IDs like F10 after F9 where digits participate */
@@ -1539,10 +1612,10 @@
         if (leg) {
           if (chipMode === "name") {
             leg.textContent =
-              "Name first, then ID · search · checkboxes filter the dashboard · Tableau URL uses Canvas ID A→Z.";
+              "Name first, then ID · search · checkboxes filter the dashboard · Canvas ID order A→Z matches the filter applied to Tableau.";
           } else {
             leg.textContent =
-              "ID first, then name · search · checkboxes filter the dashboard · Tableau URL uses Canvas ID A→Z.";
+              "ID first, then name · search · checkboxes filter the dashboard · Canvas ID order A→Z matches the filter applied to Tableau.";
           }
         }
         if (btnId && btnName) {
@@ -1586,7 +1659,7 @@
         });
         if (!any) resetCanvasSelection();
         renderCanvasIdChips(lastCanvasIds, false);
-        applyTableau(getFilterIdsForTableau());
+        flushApplyTableau();
       }
 
       function getFilterIdsForTableau() {
@@ -1641,7 +1714,7 @@
         if (filterBar) filterBar.hidden = false;
 
         list.forEach(function (rawId) {
-          var id = String(rawId).trim();
+          var id = sanitizeCanvasId(rawId);
           var name = canvasNameForId(id);
           var displayName = name || "No title in export — see Canvas ID";
 
@@ -1658,7 +1731,7 @@
           cb.type = "checkbox";
           cb.className = "canvas-card__check";
           cb.checked = !!selectedCanvasIds[id];
-          cb.setAttribute("aria-label", "Include " + id + " in Tableau filter");
+          cb.setAttribute("aria-label", "Include " + id + " in the Tableau Canvas ID filter");
           cb.addEventListener("change", function () {
             if (!cb.checked) {
               var others = 0;
@@ -1671,8 +1744,8 @@
               }
             }
             selectedCanvasIds[id] = cb.checked;
-            applyTableau(getFilterIdsForTableau());
             updateSelectionSummary();
+            scheduleApplyTableau();
           });
 
           var idSpan = document.createElement("span");
@@ -1703,41 +1776,140 @@
       }
 
       var base =
-        "https://prod-uswest-c.online.tableau.com/t/salesforce/views/IndividualCanvasUsage/GridView/8e537e0e-cb7e-465c-9d57-a3daf3ee72e0/944df2aa-b2c3-4243-bc7e-fadd696faec8";
-      var frame = document.getElementById("tableau-frame");
+        "https://prod-uswest-c.online.tableau.com/t/salesforce/views/IndividualCanvasUsage/GridView/57b0d26f-c991-4fbd-a7a4-98802a4d2a22/SLACKBOTPROMPTS";
+      var vizEl = document.getElementById("tableau-viz");
       var linkEl = document.getElementById("tableau-open-link");
+      var tableauVizReady = false;
+      var lastEmbedFilterKey = null;
+
+      function getFilterTargetSheet(viz) {
+        if (!viz || !viz.workbook) return null;
+        var sheet = viz.workbook.activeSheet;
+        if (!sheet) return null;
+        var prefer = window.TABLEAU_EMBED_FILTER_WORKSHEET || "SLACKBOTPROMPTS";
+        var wss = sheet.worksheets;
+        if (wss && wss.length) {
+          for (var i = 0; i < wss.length; i++) {
+            if (wss[i].name === prefer) return wss[i];
+          }
+          return wss[0];
+        }
+        return sheet;
+      }
+
+      function embedFilterKey(ids) {
+        return sortCanvasIdsLex(ids || []).join("\u0001");
+      }
 
       function buildTableauSrc(ids) {
         var field = window.TABLEAU_CANVAS_FILTER_FIELD || "Canvas ID";
-        var sorted = sortCanvasIdsLex(ids || []);
+        var raw = (ids || []).map(sanitizeCanvasId).filter(function (x) {
+          return x.length > 0;
+        });
+        var sorted = sortCanvasIdsLex(raw);
         /* Embed options: &:… View filters: plain &Field=… per embed_filter_add.htm */
         var q = "?:embed=y&:showAppBanner=false&:hide_tabs=false&:toolbar=top";
+        if (window.TABLEAU_EMBED_STANDARD_DPI !== false) {
+          q += "&:highdpi=false";
+        }
         if (sorted.length === 0) return base + q;
-        var key = encodeURIComponent(field);
+        var useVf = window.TABLEAU_CANVAS_FILTER_USE_VF_PREFIX === true;
+        var key = useVf
+          ? "vf_" + encodeURIComponent(field)
+          : encodeURIComponent(field);
         var style = window.TABLEAU_CANVAS_FILTER_STYLE || "comma";
+        /* Values joined with literal commas — Tableau parses OR list; do NOT encode commas between IDs */
+        var valueList = sorted.join(",");
         if (style === "repeat") {
           sorted.forEach(function (id) {
             q += "&" + key + "=" + encodeURIComponent(id);
           });
+        } else if (style === "filter-param") {
+          q += "&filter=" + encodeURIComponent(field + "=" + valueList);
         } else {
-          /* One filter param; comma-separated values; encode each ID for safe parsing */
-          q +=
-            "&" +
-            key +
-            "=" +
-            sorted
-              .map(function (id) {
-                return encodeURIComponent(id);
-              })
-              .join(",");
+          q += "&" + key + "=" + valueList;
         }
         return base + q;
       }
 
       function applyTableau(ids) {
         var url = buildTableauSrc(ids);
-        if (frame) frame.src = url;
         if (linkEl) linkEl.href = url;
+        if (!vizEl) return;
+
+        var sorted = sortCanvasIdsLex(
+          (ids || []).map(sanitizeCanvasId).filter(function (x) {
+            return x.length > 0;
+          })
+        );
+        var key = embedFilterKey(sorted);
+        if (tableauVizReady && key === lastEmbedFilterKey) return;
+
+        if (!tableauVizReady) return;
+
+        var field = window.TABLEAU_CANVAS_FILTER_FIELD || "Canvas ID";
+        var target = getFilterTargetSheet(vizEl);
+        if (!target || typeof target.applyFilterAsync !== "function") return;
+
+        var ok = function () {
+          lastEmbedFilterKey = key;
+        };
+        var fail = function (err) {
+          if (typeof console !== "undefined" && console.warn) {
+            console.warn("Tableau embed filter failed:", err);
+          }
+        };
+        var p;
+        if (sorted.length === 0) {
+          if (typeof target.clearFilterAsync === "function") {
+            p = target.clearFilterAsync(field);
+          } else {
+            p = target.applyFilterAsync(field, [], "all");
+          }
+        } else {
+          p = target.applyFilterAsync(field, sorted, "replace");
+        }
+        if (p && typeof p.then === "function") {
+          p.then(ok).catch(fail);
+        } else {
+          ok();
+        }
+      }
+
+      if (vizEl) {
+        vizEl.addEventListener("firstinteractive", function () {
+          tableauVizReady = true;
+          lastEmbedFilterKey = null;
+          applyTableau(getFilterIdsForTableau());
+        });
+      }
+
+      var tableauApplyTimer = null;
+
+      function scheduleApplyTableau() {
+        var ms = window.TABLEAU_APPLY_DEBOUNCE_MS;
+        if (typeof ms !== "number" || ms < 0) ms = 400;
+        if (ms === 0) {
+          if (tableauApplyTimer) {
+            clearTimeout(tableauApplyTimer);
+            tableauApplyTimer = null;
+          }
+          applyTableau(getFilterIdsForTableau());
+          return;
+        }
+        if (tableauApplyTimer) clearTimeout(tableauApplyTimer);
+        tableauApplyTimer = setTimeout(function () {
+          tableauApplyTimer = null;
+          applyTableau(getFilterIdsForTableau());
+        }, ms);
+      }
+
+      function flushApplyTableau() {
+        if (tableauApplyTimer) {
+          clearTimeout(tableauApplyTimer);
+          tableauApplyTimer = null;
+        }
+        applyTableau(getFilterIdsForTableau());
       }
 
       var navItems = document.querySelectorAll(".nav-item[data-channel]");
@@ -1752,6 +1924,12 @@
       var embedStack = document.getElementById("embed-stack");
       var canvasHeading = document.getElementById("canvas-ids-heading");
       var tableauNoFilterNote = document.getElementById("tableau-no-filter-note");
+      var canvasIdsNote = document.getElementById("canvas-ids-note");
+      var tableauEmbedViewLabel = document.getElementById("tableau-embed-view-label");
+      var NOTE_HTML_JTBD =
+        '<a href="https://salesforce.enterprise.slack.com/lists/T5J4Q04QG/F0AC2BAGT0C" target="_blank" rel="noopener noreferrer">JTBD list</a> · IDs from CSV <strong>Canvas</strong> by <strong>Target</strong>. Update <code>CANVAS_IDS_BY_CHANNEL</code> in <code>index.html</code> when exports change.';
+      var NOTE_HTML_SKILLS =
+        '<strong>SMB EMEA Skill</strong> Slack canvases — each <strong>Canvas ID</strong> is the segment after the last <code>/</code> in the canvas URL. Names omit the <strong>SMB EMEA Skill -</strong> prefix. Edit <code>CANVAS_IDS_BY_CHANNEL.skills</code> and <code>CANVAS_ID_TO_NAME</code> when this set changes.';
 
       var btnChipId = document.getElementById("canvas-toggle-id");
       var btnChipName = document.getElementById("canvas-toggle-name");
@@ -1768,11 +1946,26 @@
         });
       }
 
+      var canvasSearchDebounceTimer = null;
       var canvasSearchInput = document.getElementById("canvas-search-input");
       if (canvasSearchInput) {
         canvasSearchInput.addEventListener("input", function () {
           canvasSearchQuery = canvasSearchInput.value || "";
-          renderCanvasIdChips(lastCanvasIds, false);
+          var sd = window.CANVAS_SEARCH_DEBOUNCE_MS;
+          if (typeof sd !== "number" || sd < 0) sd = 120;
+          if (sd === 0) {
+            if (canvasSearchDebounceTimer) {
+              clearTimeout(canvasSearchDebounceTimer);
+              canvasSearchDebounceTimer = null;
+            }
+            renderCanvasIdChips(lastCanvasIds, false);
+            return;
+          }
+          if (canvasSearchDebounceTimer) clearTimeout(canvasSearchDebounceTimer);
+          canvasSearchDebounceTimer = setTimeout(function () {
+            canvasSearchDebounceTimer = null;
+            renderCanvasIdChips(lastCanvasIds, false);
+          }, sd);
         });
       }
 
@@ -1790,7 +1983,7 @@
             selectedCanvasIds[id] = true;
           });
           renderCanvasIdChips(lastCanvasIds, false);
-          applyTableau(getFilterIdsForTableau());
+          flushApplyTableau();
         });
       }
 
@@ -1799,6 +1992,7 @@
       function setChannel(channel) {
         var isAbout = channel === "about";
         var isUsage = channel === "usage";
+        var isSkills = channel === "skills";
         var isRole = channel === "ae" || channel === "flm" || channel === "se" || channel === "specialist";
 
         panelAbout.hidden = !isAbout;
@@ -1809,6 +2003,10 @@
         });
 
         if (isAbout) {
+          if (tableauApplyTimer) {
+            clearTimeout(tableauApplyTimer);
+            tableauApplyTimer = null;
+          }
           titleEl.textContent = "# about-us";
           badgeEl.textContent = "Canvas";
           return;
@@ -1816,7 +2014,7 @@
 
         if (usageIntro) usageIntro.hidden = !isUsage;
         if (roleIntro) roleIntro.hidden = isUsage;
-        if (roleIntroText && isRole) {
+        if (roleIntroText && !isUsage) {
           roleIntroText.innerHTML = ROLE_INTRO[channel] || "";
         }
 
@@ -1824,10 +2022,21 @@
           canvasHeading.textContent = CANVAS_HEADING[channel] || "Canvases";
         }
 
+        if (canvasIdsNote) {
+          canvasIdsNote.innerHTML = isSkills ? NOTE_HTML_SKILLS : NOTE_HTML_JTBD;
+        }
+        if (tableauEmbedViewLabel) {
+          tableauEmbedViewLabel.textContent = isSkills ? "SMB EMEA skills" : "Grid view";
+        }
+
         var ids = [];
         if (isUsage) {
           ids = byCh.usage || [];
           titleEl.textContent = "# usage-stats";
+          badgeEl.textContent = "Tableau";
+        } else if (isSkills) {
+          ids = byCh.skills || [];
+          titleEl.textContent = "# skills";
           badgeEl.textContent = "Tableau";
         } else if (isRole) {
           ids = byCh[channel] || [];
@@ -1844,9 +2053,8 @@
         if (noteEl) noteEl.hidden = !canFilter;
 
         if (canFilter) {
-          applyTableau(getFilterIdsForTableau());
-        } else if (frame) {
-          frame.removeAttribute("src");
+          flushApplyTableau();
+        } else {
           if (linkEl) linkEl.href = base;
         }
       }
