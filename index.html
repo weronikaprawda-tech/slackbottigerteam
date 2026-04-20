@@ -1398,7 +1398,7 @@
               </div>
             </div>
             <p class="embed-note" id="tableau-note">
-              <strong>Same order as this page:</strong> Canvas IDs are applied to the viz in <strong>A→Z</strong> order (string sort with numeric segments). The <strong>row order inside the grid</strong> is controlled in the published workbook — ask the owner to sort the sheet by <strong>Canvas ID</strong> ascending so the viz matches this list. If Tableau’s own filter list is hard to scroll (e.g. to reach IDs starting with <code>F09</code>), type <code>F09</code> above and click <strong>Use search in dashboard</strong> to narrow the embedded filter to matching IDs only.
+              <strong>Same order as this page:</strong> Canvas IDs are applied to the viz in <strong>A→Z</strong> alphabetical order (same lexicographic sort as Tableau’s string dimension). The <strong>row order inside the grid</strong> is controlled in the published workbook — ask the owner to sort the sheet by <strong>Canvas ID</strong> ascending so the viz matches this list. If Tableau’s own filter list is hard to scroll (e.g. to reach IDs starting with <code>F09</code>), type <code>F09</code> above and click <strong>Use search in dashboard</strong> to narrow the embedded filter to matching IDs only.
               <span class="embed-note__more"><strong>Open in Tableau</strong> still uses URL view filters. If that link misses rows, try <code>TABLEAU_CANVAS_FILTER_USE_VF_PREFIX = true</code> or <code>TABLEAU_CANVAS_FILTER_STYLE = "filter-param"</code>. Embedding uses <code>applyFilterAsync</code> on the sheet named <code>TABLEAU_EMBED_FILTER_WORKSHEET</code> (default <code>SLACKBOTPROMPTS</code> on a dashboard). <a href="https://help.tableau.com/current/api/embedding_api/en-us/docs/embedding_api_filter.html" target="_blank" rel="noopener noreferrer">Tableau Embedding API: Filter the view</a>.</span>
             </p>
           </div>
@@ -1534,11 +1534,11 @@
         "F0A90QAFKDF",
         "F0AA31XMTNW",
         "F0AA32QLU3U",
-        "F0AAFE04DPB",
-        "F0AAT71M127",
         "F0AABV1444B",
         "F0AACJ668D8",
+        "F0AAFE04DPB",
         "F0AAFNY2GC8",
+        "F0AAT71M127",
         "F0AAXF7DJ6A",
         "F0AB00F2ZND",
         "F0ABC67UN5P",
@@ -1588,7 +1588,7 @@
           .replace(/[\u200b-\u200d\ufeff\u00a0]/g, "");
       }
 
-      /** Canvas ID order for this page and for the Tableau filter (A→Z, numeric-aware). */
+      /** Canvas ID order for this page and for the Tableau filter — lexicographic A→Z (Tableau’s default alphabetical string sort). */
       function sortCanvasIdsLex(ids) {
         if (!ids || !ids.length) return [];
         return ids
@@ -1597,10 +1597,9 @@
             return sanitizeCanvasId(x);
           })
           .sort(function (a, b) {
-            /* A→Z string order; numeric: true aligns IDs like F10 after F9 where digits participate */
-            return a.localeCompare(b, undefined, {
+            return a.localeCompare(b, "en", {
               sensitivity: "base",
-              numeric: true
+              numeric: false
             });
           });
       }
