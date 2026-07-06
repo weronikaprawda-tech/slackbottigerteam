@@ -1390,7 +1390,7 @@
       grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
       gap: 12px;
       margin-bottom: 14px;
-      align-items: start;
+      align-items: stretch;
     }
 
     .sb-col-main {
@@ -1398,6 +1398,10 @@
       flex-direction: column;
       gap: 12px;
       min-width: 0;
+    }
+
+    .sb-card--grow {
+      flex: 1 1 auto;
     }
 
     .sb-charts-row {
@@ -1650,6 +1654,12 @@
       font-weight: 800;
       color: #fff;
       background: linear-gradient(135deg, #144278, #36c5f0);
+    }
+
+    .sb-user__rank--medal {
+      background: transparent;
+      font-size: 18px;
+      line-height: 1;
     }
 
     .sb-user__meta {
@@ -2054,9 +2064,9 @@
                     <div class="sb-chart" id="sb-messages-chart"></div>
                   </div>
                 </div>
-                <div class="sb-card">
-                  <h3>Adoption by organisation</h3>
-                  <p class="sb-card-sub">Ranked by 28-day message volume (Mgr Lvl 2).</p>
+                <div class="sb-card sb-card--grow">
+                  <h3>Adoption by RVP</h3>
+                  <p class="sb-card-sub">Average messages per person over 28 days — normalised for team size (Mgr Lvl 2).</p>
                   <div class="sb-bars" id="sb-orgs"></div>
                 </div>
               </div>
@@ -3392,17 +3402,28 @@
         var wrap = el("sb-orgs");
         if (!wrap) return;
         wrap.innerHTML = "";
-        var max = Math.max.apply(null, DATA.orgs.map(function (o) { return o.msg28d; }));
-        DATA.orgs.forEach(function (o, i) {
+        // Average messages per person (fair comparison across teams of different sizes).
+        var rvps = DATA.orgs
+          .map(function (o) {
+            return {
+              org: o.org,
+              users: o.users,
+              wauPct: o.wauPct,
+              avg: o.users ? o.msg28d / o.users : 0
+            };
+          })
+          .sort(function (a, b) { return b.avg - a.avg; });
+        var max = Math.max.apply(null, rvps.map(function (o) { return o.avg; }));
+        rvps.forEach(function (o, i) {
           var row = document.createElement("div");
           row.className = "sb-bar-row";
           row.innerHTML =
             '<div class="sb-bar-row__name" title="' + o.org + '">' + o.org + '</div>' +
             '<div class="sb-bar-track"><div class="sb-bar-fill"></div></div>' +
-            '<div class="sb-bar-row__val">' + fmtCompact(o.msg28d) + ' · ' + o.wauPct + '% WAU</div>';
+            '<div class="sb-bar-row__val">' + fmtInt(o.avg) + ' /person · ' + o.users + ' ppl</div>';
           wrap.appendChild(row);
           var fill = row.querySelector(".sb-bar-fill");
-          var pct = Math.max(3, (o.msg28d / max) * 100);
+          var pct = Math.max(3, (o.avg / max) * 100);
           setTimeout(function () { fill.style.width = pct + "%"; }, 120 + i * 90);
         });
       }
@@ -3411,12 +3432,15 @@
         var wrap = el("sb-top-users");
         if (!wrap) return;
         wrap.innerHTML = "";
+        var medals = ["🥇", "🥈", "🥉"];
         DATA.topUsers.forEach(function (u, i) {
           var row = document.createElement("div");
           row.className = "sb-user";
           row.style.animationDelay = (i * 70) + "ms";
+          var rankInner = i < 3 ? medals[i] : (i + 1);
+          var rankClass = "sb-user__rank" + (i < 3 ? " sb-user__rank--medal" : "");
           row.innerHTML =
-            '<div class="sb-user__rank">' + (i + 1) + '</div>' +
+            '<div class="' + rankClass + '">' + rankInner + '</div>' +
             '<div class="sb-user__meta"><div class="sb-user__name">' + u.name + '</div>' +
             '<div class="sb-user__org">' + u.org + '</div></div>' +
             '<div class="sb-user__val"><b>' + fmtInt(u.msg28d) + '</b><span>' + fmtInt(u.msg7d) + ' · 7d</span></div>';
