@@ -1943,6 +1943,7 @@
         "https://prod-uswest-c.online.tableau.com/t/salesforce/views/SlackSuccess/SlackbotDrill";
       var slackbotLvl5Field = "Lvl 05 Filter";
       var slackbotLvl5Value = "Giovanni Crispino";
+      var slackbotLvl5Candidates = ["Lvl 05 Filter", "Lvl05 Filter", "Lvl 5 Filter", "Lvl05Filter"];
       var slackbotMgrLvl6Candidates = ["Mgr Lvl 6", "Mgr Lvl 6 Filter", "Lvl 06 Filter", "Lvl 6 Filter"];
       var slackbotMgrLvl7Candidates = ["Mgr Lvl 7", "Mgr Lvl 7 Filter", "Lvl 07 Filter", "Lvl 7 Filter"];
       var vizEl = document.getElementById("tableau-viz");
@@ -1953,11 +1954,9 @@
       var slackbotFilterApplied = false;
 
       function buildSlackbotSrc() {
-        var q =
-          "?:showVizHome=no&" +
-          encodeURIComponent(slackbotLvl5Field) +
-          "=" +
-          encodeURIComponent(slackbotLvl5Value);
+        var fieldEncoded = encodeURIComponent(slackbotLvl5Field);
+        var valueEncoded = encodeURIComponent(slackbotLvl5Value);
+        var q = "?:showVizHome=no&" + fieldEncoded + "=" + valueEncoded + "&vf_" + fieldEncoded + "=" + valueEncoded;
         return slackbotBase + q;
       }
 
@@ -1969,6 +1968,38 @@
           return sheet.worksheets[0];
         }
         return sheet;
+      }
+
+      function getAllFilterTargets(viz) {
+        if (!viz || !viz.workbook || !viz.workbook.activeSheet) return [];
+        var sheet = viz.workbook.activeSheet;
+        var targets = [];
+        // Prefer dashboard first (if it supports filter API), then individual worksheets.
+        targets.push(sheet);
+        if (sheet.worksheets && sheet.worksheets.length) {
+          for (var i = 0; i < sheet.worksheets.length; i++) {
+            targets.push(sheet.worksheets[i]);
+          }
+        }
+        return targets;
+      }
+
+      function applyFirstWorkingFilter(target, fieldCandidates, values) {
+        if (!target || typeof target.applyFilterAsync !== "function") return Promise.resolve(false);
+        var idx = 0;
+        function tryNext() {
+          if (idx >= fieldCandidates.length) return Promise.resolve(false);
+          var field = fieldCandidates[idx++];
+          return target
+            .applyFilterAsync(field, values, "replace")
+            .then(function () {
+              return true;
+            })
+            .catch(function () {
+              return tryNext();
+            });
+        }
+        return tryNext();
       }
 
       function normalizeLabel(x) {
@@ -2044,22 +2075,38 @@
 
       function applySlackbotFilterIfNeeded() {
         if (activeChannel !== "slackbot-usage" || !tableauVizReady || slackbotFilterApplied) return;
-        var target = getActiveFilterTargetSheet(vizEl);
-        if (!target || typeof target.applyFilterAsync !== "function") return;
-        target
-          .applyFilterAsync(slackbotLvl5Field, [slackbotLvl5Value], "replace")
+        var targets = getAllFilterTargets(vizEl);
+        if (!targets.length) return;
+
+        // Try Lvl 05 filter on all available targets (dashboard + worksheets) and continue even if some fail.
+        var lvl5Promises = targets.map(function (target) {
+          return applyFirstWorkingFilter(target, slackbotLvl5Candidates, [slackbotLvl5Value]);
+        });
+
+        Promise.all(lvl5Promises)
           .then(function () {
+            var target = getActiveFilterTargetSheet(vizEl);
+            if (!target) return Promise.resolve(null);
+            return Promise.resolve(target);
+          })
+          .then(function () {
+            var target = getActiveFilterTargetSheet(vizEl);
+            if (!target) return null;
             return inferFilterValuesFromSummary(target, slackbotMgrLvl6Candidates);
           })
           .then(function (lvl6) {
-            if (!lvl6.fieldName || !lvl6.values.length) return null;
+            var target = getActiveFilterTargetSheet(vizEl);
+            if (!target || !lvl6 || !lvl6.fieldName || !lvl6.values.length) return null;
             return target.applyFilterAsync(lvl6.fieldName, lvl6.values, "replace");
           })
           .then(function () {
+            var target = getActiveFilterTargetSheet(vizEl);
+            if (!target) return null;
             return inferFilterValuesFromSummary(target, slackbotMgrLvl7Candidates);
           })
           .then(function (lvl7) {
-            if (!lvl7.fieldName || !lvl7.values.length) return null;
+            var target = getActiveFilterTargetSheet(vizEl);
+            if (!target || !lvl7 || !lvl7.fieldName || !lvl7.values.length) return null;
             return target.applyFilterAsync(lvl7.fieldName, lvl7.values, "replace");
           })
           .then(function () {
