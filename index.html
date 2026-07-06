@@ -1222,11 +1222,6 @@
         </button>
         <div class="nav-section-label">Legacy</div>
         <div class="nav-subsection-label">Canvas Engagement Stats</div>
-        <button type="button" class="nav-item nav-item--legacy" data-channel="usage" title="usage-stats (legacy)">
-          <span class="nav-hash">#</span>
-          <span class="nav-label">usage-stats</span>
-          <span class="nav-legacy-badge">legacy</span>
-        </button>
         <button type="button" class="nav-item nav-item--legacy" data-channel="skills" title="canvas-engagement (legacy)">
           <span class="nav-hash">#</span>
           <span class="nav-label">canvas-engagement</span>
@@ -1723,7 +1718,7 @@
 
       var ROLE_INTRO = {
         ae:
-          "JTBD list rows where <strong>Target</strong> = <strong>AE</strong>. The Tableau view below is filtered to these Canvas IDs only. <strong>#usage-stats</strong> applies the full JTBD list (all targets).",
+          "JTBD list rows where <strong>Target</strong> = <strong>AE</strong>. The Tableau view below is filtered to these Canvas IDs only. <strong>#canvas-engagement</strong> is the legacy skill-canvas subset.",
         flm:
           "Rows where <strong>Target</strong> = <strong>FLM</strong>. The viz is filtered to this Canvas ID.",
         se:
@@ -1731,7 +1726,7 @@
         specialist:
           "Rows where <strong>Target</strong> contains <strong>Specialist</strong>. <em>Your current CSV has no Specialist Canvas IDs</em> — add rows in Slack, re-export, and update <code>CANVAS_IDS_BY_CHANNEL.specialist</code>; until then there is nothing to filter the dashboard on.",
         skills:
-          "Legacy <strong>canvas engagement</strong> subset. Each item below is an <strong>SMB EMEA Skill</strong> Slack canvas. The Tableau view is filtered on <strong>Canvas ID</strong> (the file id at the end of each canvas URL, e.g. <code>F0A5BHKHFT6</code>). Display names drop the <strong>SMB EMEA Skill -</strong> prefix."
+          "Legacy <strong>canvas engagement</strong> subset. This measures <strong>people opening canvases</strong>, not actual prompt execution (current analytics limitation). Each item below is an <strong>SMB EMEA Skill</strong> Slack canvas. The Tableau view is filtered on <strong>Canvas ID</strong> (the file id at the end of each canvas URL, e.g. <code>F0A5BHKHFT6</code>). Display names drop the <strong>SMB EMEA Skill -</strong> prefix."
       };
 
       var CANVAS_HEADING = {
