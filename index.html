@@ -1946,6 +1946,8 @@
         "https://prod-uswest-c.online.tableau.com/t/salesforce/views/SlackSuccess/SlackbotDrill";
       var slackbotLvl5Field = "Lvl 05 Filter";
       var slackbotLvl5Value = "Giovanni Crispino";
+      var slackbotMgrLvl6Candidates = ["Mgr Lvl 6", "Mgr Lvl 6 Filter", "Lvl 06 Filter", "Lvl 6 Filter"];
+      var slackbotMgrLvl7Candidates = ["Mgr Lvl 7", "Mgr Lvl 7 Filter", "Lvl 07 Filter", "Lvl 7 Filter"];
       var vizEl = document.getElementById("tableau-viz");
       var linkEl = document.getElementById("tableau-open-link");
       var tableauVizReady = false;
@@ -1972,12 +1974,97 @@
         return sheet;
       }
 
+      function normalizeLabel(x) {
+        return String(x || "")
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, " ");
+      }
+
+      function getCellText(cell) {
+        if (cell == null) return "";
+        if (typeof cell === "string" || typeof cell === "number") return String(cell);
+        if (typeof cell.formattedValue === "string") return cell.formattedValue;
+        if (cell.value != null) return String(cell.value);
+        return "";
+      }
+
+      function inferFilterValuesFromSummary(target, fieldCandidates) {
+        if (!target || typeof target.getSummaryDataAsync !== "function") {
+          return Promise.resolve({ fieldName: null, values: [] });
+        }
+        return target
+          .getSummaryDataAsync({ maxRows: 10000 })
+          .then(function (summary) {
+            var cols = (summary && summary.columns) || [];
+            var rows = (summary && summary.data) || [];
+            if (!cols.length || !rows.length) {
+              return { fieldName: null, values: [] };
+            }
+
+            var candidateSet = fieldCandidates.map(normalizeLabel);
+            var colIndex = -1;
+            var fieldName = null;
+
+            for (var i = 0; i < cols.length; i++) {
+              var col = cols[i] || {};
+              var names = [
+                col.fieldName,
+                col.columnName,
+                col.caption,
+                col.name
+              ].map(normalizeLabel);
+              var hit = names.some(function (n) {
+                return candidateSet.indexOf(n) !== -1;
+              });
+              if (hit) {
+                colIndex = i;
+                fieldName = col.fieldName || col.columnName || col.caption || col.name;
+                break;
+              }
+            }
+
+            if (colIndex < 0 || !fieldName) {
+              return { fieldName: null, values: [] };
+            }
+
+            var valuesMap = {};
+            rows.forEach(function (row) {
+              var raw = row && row[colIndex];
+              var v = getCellText(raw).trim();
+              if (!v || /^null$/i.test(v) || /^\\(null\\)$/i.test(v)) return;
+              valuesMap[v] = true;
+            });
+            var values = Object.keys(valuesMap).sort(function (a, b) {
+              return a.localeCompare(b, "en", { sensitivity: "base" });
+            });
+            return { fieldName: fieldName, values: values };
+          })
+          .catch(function () {
+            return { fieldName: null, values: [] };
+          });
+      }
+
       function applySlackbotFilterIfNeeded() {
         if (activeChannel !== "slackbot-usage" || !tableauVizReady || slackbotFilterApplied) return;
         var target = getActiveFilterTargetSheet(vizEl);
         if (!target || typeof target.applyFilterAsync !== "function") return;
         target
           .applyFilterAsync(slackbotLvl5Field, [slackbotLvl5Value], "replace")
+          .then(function () {
+            return inferFilterValuesFromSummary(target, slackbotMgrLvl6Candidates);
+          })
+          .then(function (lvl6) {
+            if (!lvl6.fieldName || !lvl6.values.length) return null;
+            return target.applyFilterAsync(lvl6.fieldName, lvl6.values, "replace");
+          })
+          .then(function () {
+            return inferFilterValuesFromSummary(target, slackbotMgrLvl7Candidates);
+          })
+          .then(function (lvl7) {
+            if (!lvl7.fieldName || !lvl7.values.length) return null;
+            return target.applyFilterAsync(lvl7.fieldName, lvl7.values, "replace");
+          })
           .then(function () {
             slackbotFilterApplied = true;
           })
