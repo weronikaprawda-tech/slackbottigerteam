@@ -1067,6 +1067,71 @@
       font-weight: 600;
     }
 
+    .team-lead {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 18px 20px;
+      border-radius: 14px;
+      border: 1px solid var(--slack-border);
+      background:
+        linear-gradient(135deg, rgba(21, 93, 160, 0.28) 0%, rgba(7, 21, 37, 0.6) 100%);
+    }
+
+    .team-lead__photo {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 3px rgba(54, 197, 240, 0.55), 0 6px 18px rgba(0, 0, 0, 0.35);
+    }
+
+    .team-lead__name {
+      font-family: "Plus Jakarta Sans", "Lato", sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+    }
+
+    .team-lead__role {
+      margin-top: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #5ab4f0;
+    }
+
+    .team-lead__tag {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--slack-muted);
+    }
+
+    .person-list--grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    @media (max-width: 900px) {
+      .person-list--grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .person-list--grid {
+        grid-template-columns: 1fr;
+      }
+      .team-lead {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+
     .workspace-logo {
       width: 36px;
       height: 36px;
@@ -1728,68 +1793,82 @@
               <div class="section-card">
               <h2 id="team-heading"><span class="h-emoji" aria-hidden="true">🎉</span> The team</h2>
 
-              <div class="team-sub" id="sponsors-sub">👑 Senior Leadership Sponsors</div>
-              <div class="person-list" aria-labelledby="sponsors-sub">
-                <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U01GEN3DHHS" target="_blank" rel="noopener noreferrer">
-                  <span class="avatar" style="--a1: #9e6a03; --a2: #144278" aria-hidden="true">S1</span>
-                  <span class="person-meta">
-                    <span class="person-label">Leadership sponsor · photo TBC</span>
-                    <span class="person-subl">View Slack profile →</span>
-                  </span>
-                </a>
-                <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U01GY0URXT2" target="_blank" rel="noopener noreferrer">
-                  <span class="avatar" style="--a1: #0b6e99; --a2: #071525" aria-hidden="true">S2</span>
-                  <span class="person-meta">
-                    <span class="person-label">Leadership sponsor · photo TBC</span>
-                    <span class="person-subl">View Slack profile →</span>
-                  </span>
-                </a>
+              <div class="team-sub" id="lead-sub">👑 Programme Lead</div>
+              <div class="team-lead" aria-labelledby="lead-sub">
+                <img class="team-lead__photo" src="giovanni-crispino.png" alt="Giovanni Crispino" />
+                <div>
+                  <div class="team-lead__name">Giovanni Crispino</div>
+                  <div class="team-lead__role">AVP Sales</div>
+                  <div class="team-lead__tag">Drives the EMEA SMB GTM AI Centre of Excellence.</div>
+                </div>
               </div>
 
               <div class="team-sub" id="members-sub">⭐ CoE Members</div>
-              <div class="person-list" aria-labelledby="members-sub">
-                <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U03SR1BB2GG" target="_blank" rel="noopener noreferrer">
-                  <span class="avatar" style="--a1: #2eb886; --a2: #1a3d5c" aria-hidden="true">T1</span>
-                  <span class="person-meta">
-                    <span class="person-label">CoE member · photo TBC</span>
-                    <span class="person-subl">View Slack profile →</span>
-                  </span>
-                </a>
-                <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U031QRZRNQH" target="_blank" rel="noopener noreferrer">
-                  <span class="avatar" style="--a1: #e01e5a; --a2: #144278" aria-hidden="true">T2</span>
-                  <span class="person-meta">
-                    <span class="person-label">CoE member · photo TBC</span>
-                    <span class="person-subl">View Slack profile →</span>
-                  </span>
-                </a>
-                <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U08B8R8M7SR" target="_blank" rel="noopener noreferrer">
-                  <span class="avatar" style="--a1: #ecb22e; --a2: #8b5a2b" aria-hidden="true">T3</span>
-                  <span class="person-meta">
-                    <span class="person-label">CoE member · photo TBC</span>
-                    <span class="person-subl">View Slack profile →</span>
-                  </span>
-                </a>
-                <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U0832QTDRK6" target="_blank" rel="noopener noreferrer">
-                  <span class="avatar" style="--a1: #36c5f0; --a2: #071525" aria-hidden="true">T4</span>
-                  <span class="person-meta">
-                    <span class="person-label">CoE member · photo TBC</span>
-                    <span class="person-subl">View Slack profile →</span>
-                  </span>
-                </a>
-                <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U02350Y95NH" target="_blank" rel="noopener noreferrer">
-                  <span class="avatar" style="--a1: #144278; --a2: #e01e5a" aria-hidden="true">T5</span>
-                  <span class="person-meta">
-                    <span class="person-label">CoE member · photo TBC</span>
-                    <span class="person-subl">View Slack profile →</span>
-                  </span>
-                </a>
-                <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U01GYL20ZR6" target="_blank" rel="noopener noreferrer">
-                  <span class="avatar" style="--a1: #1164a3; --a2: #2eb886" aria-hidden="true">T6</span>
-                  <span class="person-meta">
-                    <span class="person-label">CoE member · photo TBC</span>
-                    <span class="person-subl">View Slack profile →</span>
-                  </span>
-                </a>
+              <div class="person-list person-list--grid" aria-labelledby="members-sub">
+                <div class="person-row">
+                  <span class="avatar" style="--a1: #2eb886; --a2: #1a3d5c" aria-hidden="true">AT</span>
+                  <span class="person-meta"><span class="person-label">Andrea Talpo</span></span>
+                </div>
+                <div class="person-row">
+                  <span class="avatar" style="--a1: #e01e5a; --a2: #144278" aria-hidden="true">CS</span>
+                  <span class="person-meta"><span class="person-label">Camille Schiavi</span></span>
+                </div>
+                <div class="person-row">
+                  <span class="avatar" style="--a1: #ecb22e; --a2: #8b5a2b" aria-hidden="true">DT</span>
+                  <span class="person-meta"><span class="person-label">David Thom</span></span>
+                </div>
+                <div class="person-row">
+                  <span class="avatar" style="--a1: #36c5f0; --a2: #071525" aria-hidden="true">DS</span>
+                  <span class="person-meta"><span class="person-label">Drew Sickler</span></span>
+                </div>
+                <div class="person-row">
+                  <span class="avatar" style="--a1: #144278; --a2: #e01e5a" aria-hidden="true">EC</span>
+                  <span class="person-meta"><span class="person-label">Eoin Comerford</span></span>
+                </div>
+                <div class="person-row">
+                  <span class="avatar" style="--a1: #1164a3; --a2: #2eb886" aria-hidden="true">FM</span>
+                  <span class="person-meta"><span class="person-label">Feargal McDonnell</span></span>
+                </div>
+                <div class="person-row">
+                  <span class="avatar" style="--a1: #7c3aed; --a2: #155da0" aria-hidden="true">KS</span>
+                  <span class="person-meta"><span class="person-label">Kathrin Schmitz</span></span>
+                </div>
+                <div class="person-row">
+                  <span class="avatar" style="--a1: #0b6e99; --a2: #071525" aria-hidden="true">LJ</span>
+                  <span class="person-meta"><span class="person-label">Leonard Jans</span></span>
+                </div>
+                <div class="person-row">
+                  <span class="avatar" style="--a1: #9e6a03; --a2: #144278" aria-hidden="true">LH</span>
+                  <span class="person-meta"><span class="person-label">Lorcan Hiney</span></span>
+                </div>
+                <div class="person-row">
+                  <span class="avatar" style="--a1: #2eb886; --a2: #071525" aria-hidden="true">MS</span>
+                  <span class="person-meta"><span class="person-label">Mark Shanahan</span></span>
+                </div>
+                <div class="person-row">
+                  <span class="avatar" style="--a1: #e01e5a; --a2: #8b5a2b" aria-hidden="true">MJ</span>
+                  <span class="person-meta"><span class="person-label">Maxime Jacquet</span></span>
+                </div>
+                <div class="person-row">
+                  <span class="avatar" style="--a1: #36c5f0; --a2: #1a3d5c" aria-hidden="true">OT</span>
+                  <span class="person-meta"><span class="person-label">Oliver Thiel</span></span>
+                </div>
+                <div class="person-row">
+                  <span class="avatar" style="--a1: #144278; --a2: #2eb886" aria-hidden="true">RF</span>
+                  <span class="person-meta"><span class="person-label">Richard Felle</span></span>
+                </div>
+                <div class="person-row">
+                  <span class="avatar" style="--a1: #1164a3; --a2: #e01e5a" aria-hidden="true">ST</span>
+                  <span class="person-meta"><span class="person-label">Sarah Thomas</span></span>
+                </div>
+                <div class="person-row">
+                  <span class="avatar" style="--a1: #7c3aed; --a2: #071525" aria-hidden="true">SW</span>
+                  <span class="person-meta"><span class="person-label">Stephanie Walsh</span></span>
+                </div>
+                <div class="person-row">
+                  <span class="avatar" style="--a1: #0b6e99; --a2: #155da0" aria-hidden="true">WP</span>
+                  <span class="person-meta"><span class="person-label">Weronika Prawda</span></span>
+                </div>
               </div>
               </div>
             </section>
