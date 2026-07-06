@@ -1943,7 +1943,15 @@
         "https://prod-uswest-c.online.tableau.com/t/salesforce/views/SlackSuccess/SlackbotDrill";
       var slackbotLvl5Field = "Lvl 05 Filter";
       var slackbotLvl5Value = "Giovanni Crispino";
-      var slackbotLvl5Candidates = ["Lvl 05 Filter", "Lvl05 Filter", "Lvl 5 Filter", "Lvl05Filter"];
+      var slackbotLvl5Candidates = [
+        "Lvl 05 Filter",
+        "Lvl05 Filter",
+        "Lvl 5 Filter",
+        "Lvl05Filter",
+        "Lvl 05",
+        "Level 05 Filter",
+        "Level 5 Filter"
+      ];
       var slackbotMgrLvl6Candidates = ["Mgr Lvl 6", "Mgr Lvl 6 Filter", "Lvl 06 Filter", "Lvl 6 Filter"];
       var slackbotMgrLvl7Candidates = ["Mgr Lvl 7", "Mgr Lvl 7 Filter", "Lvl 07 Filter", "Lvl 7 Filter"];
       var vizEl = document.getElementById("tableau-viz");
@@ -1970,36 +1978,53 @@
         return sheet;
       }
 
-      function getAllFilterTargets(viz) {
+      function getSlackbotFilterTargets(viz) {
         if (!viz || !viz.workbook || !viz.workbook.activeSheet) return [];
         var sheet = viz.workbook.activeSheet;
         var targets = [];
-        // Prefer dashboard first (if it supports filter API), then individual worksheets.
-        targets.push(sheet);
-        if (sheet.worksheets && sheet.worksheets.length) {
-          for (var i = 0; i < sheet.worksheets.length; i++) {
-            targets.push(sheet.worksheets[i]);
+        var wss = sheet.worksheets || [];
+        var prefer = window.TABLEAU_SLACKBOT_FILTER_WORKSHEET || "SlackbotDrill";
+
+        // Preferred worksheet first (similar to canvas-engagement flow).
+        for (var i = 0; i < wss.length; i++) {
+          if (wss[i] && wss[i].name === prefer) {
+            targets.push(wss[i]);
+            break;
           }
         }
+        // Then all other worksheets.
+        for (var j = 0; j < wss.length; j++) {
+          if (targets.indexOf(wss[j]) === -1) targets.push(wss[j]);
+        }
+        // Finally the active sheet/dashboard object.
+        if (targets.indexOf(sheet) === -1) targets.push(sheet);
         return targets;
       }
 
-      function applyFirstWorkingFilter(target, fieldCandidates, values) {
-        if (!target || typeof target.applyFilterAsync !== "function") return Promise.resolve(false);
-        var idx = 0;
-        function tryNext() {
-          if (idx >= fieldCandidates.length) return Promise.resolve(false);
-          var field = fieldCandidates[idx++];
-          return target
-            .applyFilterAsync(field, values, "replace")
-            .then(function () {
-              return true;
-            })
-            .catch(function () {
-              return tryNext();
-            });
+      function applyFilterAcrossTargets(targets, fieldCandidates, values) {
+        var ti = 0;
+        function tryTarget() {
+          if (ti >= targets.length) return Promise.resolve(false);
+          var target = targets[ti++];
+          if (!target || typeof target.applyFilterAsync !== "function") {
+            return tryTarget();
+          }
+          var fi = 0;
+          function tryField() {
+            if (fi >= fieldCandidates.length) return tryTarget();
+            var field = fieldCandidates[fi++];
+            return target
+              .applyFilterAsync(field, values, "replace")
+              .then(function () {
+                return true;
+              })
+              .catch(function () {
+                return tryField();
+              });
+          }
+          return tryField();
         }
-        return tryNext();
+        return tryTarget();
       }
 
       function normalizeLabel(x) {
@@ -2073,21 +2098,22 @@
           });
       }
 
-      function applySlackbotFilterIfNeeded() {
+      function applySlackbotFilterIfNeeded(attempt) {
+        if (attempt == null) attempt = 1;
         if (activeChannel !== "slackbot-usage" || !tableauVizReady || slackbotFilterApplied) return;
-        var targets = getAllFilterTargets(vizEl);
+        var targets = getSlackbotFilterTargets(vizEl);
         if (!targets.length) return;
 
-        // Try Lvl 05 filter on all available targets (dashboard + worksheets) and continue even if some fail.
-        var lvl5Promises = targets.map(function (target) {
-          return applyFirstWorkingFilter(target, slackbotLvl5Candidates, [slackbotLvl5Value]);
-        });
-
-        Promise.all(lvl5Promises)
-          .then(function () {
-            var target = getActiveFilterTargetSheet(vizEl);
-            if (!target) return Promise.resolve(null);
-            return Promise.resolve(target);
+        applyFilterAcrossTargets(targets, slackbotLvl5Candidates, [slackbotLvl5Value])
+          .then(function (lvl5Applied) {
+            // Retry a few times if Tableau internals are not ready yet.
+            if (!lvl5Applied && attempt < 4) {
+              setTimeout(function () {
+                applySlackbotFilterIfNeeded(attempt + 1);
+              }, 700 * attempt);
+              return null;
+            }
+            return lvl5Applied;
           })
           .then(function () {
             var target = getActiveFilterTargetSheet(vizEl);
