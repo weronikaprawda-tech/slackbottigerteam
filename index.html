@@ -1527,6 +1527,7 @@
               <span class="embed-note__more"><strong>Open in Tableau</strong> still uses URL view filters. If that link misses rows, try <code>TABLEAU_CANVAS_FILTER_USE_VF_PREFIX = true</code> or <code>TABLEAU_CANVAS_FILTER_STYLE = "filter-param"</code>. Embedding uses <code>applyFilterAsync</code> on the sheet named <code>TABLEAU_EMBED_FILTER_WORKSHEET</code> (default <code>SLACKBOTPROMPTS</code> on a dashboard). <a href="https://help.tableau.com/current/api/embedding_api/en-us/docs/embedding_api_filter.html" target="_blank" rel="noopener noreferrer">Tableau Embedding API: Filter the view</a>.</span>
             </p>
           </div>
+        </div>
         <div class="panel" id="panel-skill-adoption" role="tabpanel" hidden>
           <div class="placeholder-panel">
             <div class="placeholder-icon" aria-hidden="true">📈</div>
@@ -1535,29 +1536,6 @@
             <span class="placeholder-chip">🚧 Coming soon</span>
           </div>
         </div>
-
-        <div class="panel" id="panel-slackbot" role="tabpanel" hidden>
-          <section class="usage-intro" aria-labelledby="slackbot-intro-heading">
-            <h2 id="slackbot-intro-heading">🤖 Individual Slackbot Usage</h2>
-            <p>
-              This dashboard shows <strong>individual-level Slackbot usage</strong> from the <em>Slack Success</em> workbook. Use the native Tableau filters within the view to drill into specific users, time periods, or usage patterns.
-            </p>
-            <p style="margin-top: 10px; font-size: 13px; color: var(--slack-muted)">
-              Filters are embedded in the dashboard — use the controls inside the viz to slice the data.
-            </p>
-          </section>
-          <div class="embed-stack">
-            <div class="embed-card">
-              <div class="embed-toolbar">
-                <strong>Slackbot Drill</strong>
-                <span>·</span>
-                <span>Slack Success</span>
-              </div>
-              <div class="embed-frame-wrap" id="slackbot-embed-wrap"></div>
-            </div>
-          </div>
-        </div>
-
         </div>
       </div>
     </div>
@@ -1957,6 +1935,7 @@
       var linkEl = document.getElementById("tableau-open-link");
       var tableauVizReady = false;
       var lastEmbedFilterKey = null;
+      var activeChannel = "about";
 
       function getFilterTargetSheet(viz) {
         if (!viz || !viz.workbook) return null;
@@ -2056,6 +2035,9 @@
         vizEl.addEventListener("firstinteractive", function () {
           tableauVizReady = true;
           lastEmbedFilterKey = null;
+          if (activeChannel === "slackbot-usage") {
+            return;
+          }
           applyTableau(getFilterIdsForTableau());
         });
       }
@@ -2063,6 +2045,7 @@
       var tableauApplyTimer = null;
 
       function scheduleApplyTableau() {
+        if (activeChannel === "slackbot-usage") return;
         var ms = window.TABLEAU_APPLY_DEBOUNCE_MS;
         if (typeof ms !== "number" || ms < 0) ms = 400;
         if (ms === 0) {
@@ -2081,6 +2064,7 @@
       }
 
       function flushApplyTableau() {
+        if (activeChannel === "slackbot-usage") return;
         if (tableauApplyTimer) {
           clearTimeout(tableauApplyTimer);
           tableauApplyTimer = null;
@@ -2092,7 +2076,6 @@
       var panelAbout = document.getElementById("panel-about");
       var panelTableau = document.getElementById("panel-tableau");
       var panelSkillAdoption = document.getElementById("panel-skill-adoption");
-      var panelSlackbot = document.getElementById("panel-slackbot");
       var titleEl = document.getElementById("channel-title");
       var badgeEl = document.getElementById("channel-badge");
       var noteEl = document.getElementById("tableau-note");
@@ -2169,6 +2152,7 @@
       var byCh = window.CANVAS_IDS_BY_CHANNEL || {};
 
       function setChannel(channel) {
+        activeChannel = channel;
         var isAbout = channel === "about";
         var isUsage = channel === "usage";
         var isSkills = channel === "skills";
@@ -2181,7 +2165,6 @@
         panelAbout.hidden = !isAbout;
         panelTableau.hidden = !isTableauPanel;
         if (panelSkillAdoption) panelSkillAdoption.hidden = !isSkillAdoption;
-        if (panelSlackbot) panelSlackbot.hidden = true; // always hide old separate panel
 
         navItems.forEach(function (btn) {
           btn.classList.toggle("active", btn.getAttribute("data-channel") === channel);
@@ -2206,11 +2189,18 @@
         if (roleIntro) roleIntro.hidden = isUsage || isSlackbot;
 
         if (isSlackbot) {
+          if (tableauApplyTimer) {
+            clearTimeout(tableauApplyTimer);
+            tableauApplyTimer = null;
+          }
           titleEl.textContent = "# slackbot-usage";
           badgeEl.textContent = "Tableau";
           // Swap viz to SlackbotDrill
-          if (vizEl) vizEl.setAttribute("src", slackbotBase);
+          if (vizEl) vizEl.setAttribute("src", slackbotBase + "?:showVizHome=no");
           if (linkEl) { linkEl.href = slackbotBase; linkEl.hidden = false; }
+          if (tableauEmbedViewLabel) tableauEmbedViewLabel.textContent = "Slackbot Drill";
+          var workbookLabelEl = document.getElementById("tableau-embed-workbook-label");
+          if (workbookLabelEl) workbookLabelEl.textContent = "Slack Success";
           // Hide canvas filter panel — no IDs needed for this workbook
           var canvasPanel = document.querySelector(".canvas-ids-panel");
           if (canvasPanel) canvasPanel.hidden = true;
@@ -2228,6 +2218,11 @@
           tableauVizReady = false;
           lastEmbedFilterKey = null;
         }
+        if (tableauEmbedViewLabel) {
+          tableauEmbedViewLabel.textContent = isSkills ? "SMB EMEA skills" : "Grid view";
+        }
+        var workbookLabelEl = document.getElementById("tableau-embed-workbook-label");
+        if (workbookLabelEl) workbookLabelEl.textContent = "Individual Canvas Usage";
         var canvasPanel = document.querySelector(".canvas-ids-panel");
         if (canvasPanel) canvasPanel.hidden = false;
 
