@@ -1140,16 +1140,26 @@
       border: 1px solid rgba(236, 178, 46, 0.3);
     }
 
-    /* Slackbot usage panel */
+    /* Slackbot usage panel — mirrors the #panel-tableau layout rules */
     #panel-slackbot {
       gap: 14px;
       flex: 0 0 auto;
       min-height: min-content;
     }
 
+    #panel-slackbot .embed-stack {
+      flex: 0 0 auto;
+      width: 100%;
+    }
+
+    #panel-slackbot .embed-card {
+      flex: 0 0 auto;
+    }
+
     #panel-slackbot .embed-frame-wrap {
       flex: 0 0 auto;
       min-height: clamp(640px, 80vh, 1400px);
+      height: clamp(640px, 80vh, 1400px);
     }
 
     @media (max-width: 900px) {
@@ -1536,17 +1546,7 @@
                 <span>·</span>
                 <span>Slack Success</span>
               </div>
-              <div class="embed-frame-wrap" style="min-height: clamp(640px, 80vh, 1400px)">
-                <tableau-viz
-                  id="tableau-viz-slackbot"
-                  title="Tableau: Slackbot Drill"
-                  src="https://prod-uswest-c.online.tableau.com/t/salesforce/views/SlackSuccess/SlackbotDrill"
-                  width="100%"
-                  height="100%"
-                  hide-tabs
-                  toolbar="bottom"
-                ></tableau-viz>
-              </div>
+              <div class="embed-frame-wrap" id="slackbot-embed-wrap"></div>
             </div>
           </div>
         </div>
@@ -2205,6 +2205,19 @@
         if (isSlackbot) {
           titleEl.textContent = "# slackbot-usage";
           badgeEl.textContent = "Tableau";
+          // Lazy-inject the viz the first time so it initialises in a visible context
+          var slackbotWrap = document.getElementById("slackbot-embed-wrap");
+          if (slackbotWrap && !slackbotWrap.querySelector("tableau-viz")) {
+            var slackbotViz = document.createElement("tableau-viz");
+            slackbotViz.setAttribute("id", "tableau-viz-slackbot");
+            slackbotViz.setAttribute("title", "Tableau: Slackbot Drill");
+            slackbotViz.setAttribute("src", "https://prod-uswest-c.online.tableau.com/t/salesforce/views/SlackSuccess/SlackbotDrill");
+            slackbotViz.setAttribute("width", "100%");
+            slackbotViz.setAttribute("height", "100%");
+            slackbotViz.setAttribute("hide-tabs", "");
+            slackbotViz.setAttribute("toolbar", "bottom");
+            slackbotWrap.appendChild(slackbotViz);
+          }
           return;
         }
 
