@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>EMEA SMB Slackbot Tiger Team</title>
+  <title>EMEA SMB GTM AI Centre of Excellence</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <!-- Warm DNS + TLS to Tableau Cloud so the viz loads sooner after you open Usage -->
@@ -1056,6 +1056,102 @@
       font-weight: 600;
     }
 
+    .workspace-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .hero-logo {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      margin-bottom: 14px;
+      display: block;
+    }
+
+    /* Legacy nav items */
+    .nav-item--legacy {
+      opacity: 0.65;
+    }
+
+    .nav-item--legacy:hover {
+      opacity: 0.9;
+    }
+
+    .nav-item--legacy .nav-legacy-badge {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: rgba(236, 178, 46, 0.18);
+      border: 1px solid rgba(236, 178, 46, 0.35);
+      color: #ecb22e;
+      flex-shrink: 0;
+      letter-spacing: 0.04em;
+    }
+
+    /* Placeholder panels */
+    .placeholder-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 48px 24px;
+      text-align: center;
+    }
+
+    .placeholder-icon {
+      font-size: 48px;
+      line-height: 1;
+    }
+
+    .placeholder-panel h2 {
+      margin: 0;
+      font-family: "Plus Jakarta Sans", "Lato", sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .placeholder-panel p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--slack-muted);
+      max-width: 40ch;
+    }
+
+    .placeholder-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #ecb22e;
+      background: rgba(236, 178, 46, 0.12);
+      border: 1px solid rgba(236, 178, 46, 0.3);
+    }
+
+    /* Slackbot usage panel */
+    #panel-slackbot {
+      gap: 14px;
+      flex: 0 0 auto;
+      min-height: min-content;
+    }
+
+    #panel-slackbot .embed-frame-wrap {
+      flex: 0 0 auto;
+      min-height: clamp(640px, 80vh, 1400px);
+    }
+
     @media (max-width: 900px) {
       .sidebar {
         width: 72px;
@@ -1083,9 +1179,9 @@
   <div class="app">
     <aside class="sidebar" aria-label="Workspace navigation">
       <div class="workspace-header">
-        <span class="workspace-emoji" aria-hidden="true">🐯</span>
+        <img class="workspace-logo" src="logo.png" alt="GTM AI CoE" />
         <div class="workspace-names">
-          <span class="workspace-title">Slackbot Tiger Team</span>
+          <span class="workspace-title">GTM AI Centre of Excellence</span>
           <span class="workspace-sub">EMEA SMB</span>
         </div>
       </div>
@@ -1096,14 +1192,14 @@
           <span class="nav-label">about-us</span>
           <span class="presence" aria-hidden="true"></span>
         </button>
-        <div class="nav-section-label">Usage</div>
-        <button type="button" class="nav-item" data-channel="usage" title="usage-stats">
+        <div class="nav-section-label">Analytics</div>
+        <button type="button" class="nav-item" data-channel="skill-adoption" title="skill-adoption">
           <span class="nav-hash">#</span>
-          <span class="nav-label">usage-stats</span>
+          <span class="nav-label">skill-adoption</span>
         </button>
-        <button type="button" class="nav-item" data-channel="skills" title="skills">
+        <button type="button" class="nav-item" data-channel="slackbot-usage" title="slackbot-usage">
           <span class="nav-hash">#</span>
-          <span class="nav-label">skills</span>
+          <span class="nav-label">slackbot-usage</span>
         </button>
         <div class="nav-section-label">JTBD by role</div>
         <button type="button" class="nav-item" data-channel="ae" title="ae">
@@ -1121,6 +1217,17 @@
         <button type="button" class="nav-item" data-channel="specialist" title="specialist">
           <span class="nav-hash">#</span>
           <span class="nav-label">specialist</span>
+        </button>
+        <div class="nav-section-label">Legacy</div>
+        <button type="button" class="nav-item nav-item--legacy" data-channel="usage" title="usage-stats (legacy)">
+          <span class="nav-hash">#</span>
+          <span class="nav-label">usage-stats</span>
+          <span class="nav-legacy-badge">legacy</span>
+        </button>
+        <button type="button" class="nav-item nav-item--legacy" data-channel="skills" title="skills (legacy)">
+          <span class="nav-hash">#</span>
+          <span class="nav-label">skills</span>
+          <span class="nav-legacy-badge">legacy</span>
         </button>
       </div>
       <div class="sidebar-footer">
@@ -1152,53 +1259,54 @@
           <div class="about-scroll">
             <div class="about-hero">
               <div class="about-hero-content">
-                <p class="about-kicker">EMEA SMB · Slack AI</p>
+                <img class="hero-logo" src="logo.png" alt="GTM AI CoE logo" />
+                <p class="about-kicker">EMEA SMB · GTM AI Centre of Excellence</p>
                 <h1>
-                  🐯 <span class="gradient-text">Slackbot Tiger Team</span> — About us
+                  <span class="gradient-text">GTM AI Centre of Excellence</span>
                 </h1>
                 <p class="about-lede">
-                  We help reps, managers, and teams across Salesforce work smarter in Slack — not only Account Executives, but <strong>Sales Leaders</strong> and colleagues in other parts of the company who want repeatable prompts, clearer insights, and less time lost to busywork.
+                  Driving <strong>PipeGen, ACV excellence, and Retention + Consumption</strong> at scale — embedding AI into every sales motion, every day, for every rep and manager in EMEA SMB.
                 </p>
                 <div class="about-pills" aria-hidden="true">
-                  <span class="about-pill">Pipe &amp; ACV</span>
-                  <span class="about-pill">Coaching &amp; cadence</span>
-                  <span class="about-pill">Cross-org pilots</span>
+                  <span class="about-pill">PipeGen</span>
+                  <span class="about-pill">ACV Excellence</span>
+                  <span class="about-pill">Retention &amp; Consumption</span>
                 </div>
               </div>
             </div>
             <div class="about-inner">
-              <div class="audience-grid" aria-label="Who we serve">
+              <div class="audience-grid" aria-label="Strategic Focus Areas">
                 <div class="audience-card">
-                  <div class="ac-icon" aria-hidden="true">🎯</div>
-                  <h3>Account Executives</h3>
-                  <p>Faster research, sharper account stories, and prompts tuned to how ESMB sells day to day.</p>
+                  <div class="ac-icon" aria-hidden="true">🚀</div>
+                  <h3>PipeGen</h3>
+                  <p>High quality, consistent AE prospecting activity every day — turning AI tools into daily prospecting habits.</p>
                 </div>
                 <div class="audience-card">
-                  <div class="ac-icon" aria-hidden="true">📈</div>
-                  <h3>Sales Leaders</h3>
-                  <p>Better visibility, coaching hooks, and habits that scale — so leaders can reinforce what good looks like in Slack.</p>
+                  <div class="ac-icon" aria-hidden="true">🏆</div>
+                  <h3>ACV Excellence</h3>
+                  <p>Excellence in deal execution — from discovery to close, AI-powered insights that sharpen every deal motion.</p>
                 </div>
                 <div class="audience-card">
-                  <div class="ac-icon" aria-hidden="true">🌐</div>
-                  <h3>Broader Salesforce</h3>
-                  <p>We’ve shipped experiments, prompts, and learnings that other teams and regions have adapted — not just one lane.</p>
+                  <div class="ac-icon" aria-hidden="true">🔄</div>
+                  <h3>Retention + Consumption</h3>
+                  <p>Every day customer engagement and agentic transformation — keeping customers growing through AI-led touchpoints.</p>
                 </div>
               </div>
 
               <div class="bento">
                 <section class="about-section section-card bento-wide" aria-labelledby="who-heading">
-                  <h2 id="who-heading"><span class="h-emoji" aria-hidden="true">🚀</span> Who we are</h2>
+                  <h2 id="who-heading"><span class="h-emoji" aria-hidden="true">🧠</span> Who we are</h2>
                   <p>
-                    We are the <strong>EMEA SMB Slackbot Tiger Team</strong> — a cross-functional group of Solution Engineers and Sales leaders dedicated to Slackbot as an <strong>AI copilot</strong> for the organisation. Our focus spans the full customer-facing motion: front-line sellers, their managers, and enablement that touches multiple parts of the company.
+                    We are the <strong>EMEA SMB GTM AI Centre of Excellence</strong> — a cross-functional group of Solution Engineers, Sales leaders, and AI practitioners driving the adoption of Salesforce AI across the EMEA SMB organisation. Our mandate spans the full revenue motion: front-line prospecting, deal execution, and post-sale customer engagement.
                   </p>
                   <p>
-                    Our mission: make <strong>every AE and every Sales Leader</strong> more effective, and share what works with <strong>others across Salesforce</strong> who can reuse the same patterns — from prompt libraries to clinics and pilots.
+                    Our mission: embed AI into the daily workflow of <strong>every AE, every Sales Leader, and every specialist</strong> — so that using AI is not an extra step but simply how work gets done.
                   </p>
                 </section>
 
                 <section class="about-section section-card" aria-labelledby="goal-heading">
                   <h2 id="goal-heading"><span class="h-emoji" aria-hidden="true">🎯</span> Our goal</h2>
-                  <p style="margin-bottom: 0">From static reports to live exploration. From endless research to clear recommendations — inside Slack, for everyone in the revenue org who depends on timely context.</p>
+                  <p style="margin-bottom: 0">Equip every seller and sales leader with AI-powered workflows that drive pipeline, accelerate deal velocity, and deepen customer engagement — every single day.</p>
                 </section>
 
                 <section class="about-section section-card" aria-labelledby="together-heading">
@@ -1208,19 +1316,19 @@
               </div>
 
               <section class="about-section section-card" style="margin-top: 12px" aria-labelledby="serve-heading">
-                <h2 id="serve-heading"><span class="h-emoji" aria-hidden="true">✨</span> What we optimise for</h2>
+                <h2 id="serve-heading"><span class="h-emoji" aria-hidden="true">✨</span> Standing Objectives — Strategic Focus Areas (V2MOM)</h2>
                 <div class="goal-columns">
                   <div class="goal-mini">
-                    <strong>AEs</strong>
-                    Easier access to account and territory context; less time hunting, more time selling.
+                    <strong>PipeGen</strong>
+                    High Quality Consistent AE Prospecting Activity Every Day — AI-powered habits that fill the top of funnel reliably.
                   </div>
                   <div class="goal-mini">
-                    <strong>Sales Leaders</strong>
-                    Repeatable prompts and rituals that reinforce pipeline hygiene, coaching, and team habits.
+                    <strong>ACV</strong>
+                    Excellence in Deal Execution — sharper discovery, faster deal cycles, and AI that surfaces the right insight at the right moment.
                   </div>
                   <div class="goal-mini">
-                    <strong>Other teams</strong>
-                    Playbooks and pilots others can fork — we’ve already inspired work in other regions and business units.
+                    <strong>Retention + Consumption</strong>
+                    Every Day Customer Engagement and Agentic Transformation — keeping customers activated, growing, and future-ready.
                   </div>
                 </div>
               </section>
@@ -1247,47 +1355,47 @@
                 </a>
               </div>
 
-              <div class="team-sub" id="members-sub">⭐ Tiger Team Members</div>
+              <div class="team-sub" id="members-sub">⭐ CoE Members</div>
               <div class="person-list" aria-labelledby="members-sub">
                 <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U03SR1BB2GG" target="_blank" rel="noopener noreferrer">
                   <span class="avatar" style="--a1: #2eb886; --a2: #1a3d5c" aria-hidden="true">T1</span>
                   <span class="person-meta">
-                    <span class="person-label">Tiger team member · photo TBC</span>
+                    <span class="person-label">CoE member · photo TBC</span>
                     <span class="person-subl">View Slack profile →</span>
                   </span>
                 </a>
                 <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U031QRZRNQH" target="_blank" rel="noopener noreferrer">
                   <span class="avatar" style="--a1: #e01e5a; --a2: #611f69" aria-hidden="true">T2</span>
                   <span class="person-meta">
-                    <span class="person-label">Tiger team member · photo TBC</span>
+                    <span class="person-label">CoE member · photo TBC</span>
                     <span class="person-subl">View Slack profile →</span>
                   </span>
                 </a>
                 <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U08B8R8M7SR" target="_blank" rel="noopener noreferrer">
                   <span class="avatar" style="--a1: #ecb22e; --a2: #8b5a2b" aria-hidden="true">T3</span>
                   <span class="person-meta">
-                    <span class="person-label">Tiger team member · photo TBC</span>
+                    <span class="person-label">CoE member · photo TBC</span>
                     <span class="person-subl">View Slack profile →</span>
                   </span>
                 </a>
                 <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U0832QTDRK6" target="_blank" rel="noopener noreferrer">
                   <span class="avatar" style="--a1: #36c5f0; --a2: #350d36" aria-hidden="true">T4</span>
                   <span class="person-meta">
-                    <span class="person-label">Tiger team member · photo TBC</span>
+                    <span class="person-label">CoE member · photo TBC</span>
                     <span class="person-subl">View Slack profile →</span>
                   </span>
                 </a>
                 <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U02350Y95NH" target="_blank" rel="noopener noreferrer">
                   <span class="avatar" style="--a1: #611f69; --a2: #e01e5a" aria-hidden="true">T5</span>
                   <span class="person-meta">
-                    <span class="person-label">Tiger team member · photo TBC</span>
+                    <span class="person-label">CoE member · photo TBC</span>
                     <span class="person-subl">View Slack profile →</span>
                   </span>
                 </a>
                 <a class="person-row" href="https://salesforce.enterprise.slack.com/team/U01GYL20ZR6" target="_blank" rel="noopener noreferrer">
                   <span class="avatar" style="--a1: #1164a3; --a2: #2eb886" aria-hidden="true">T6</span>
                   <span class="person-meta">
-                    <span class="person-label">Tiger team member · photo TBC</span>
+                    <span class="person-label">CoE member · photo TBC</span>
                     <span class="person-subl">View Slack profile →</span>
                   </span>
                 </a>
@@ -1402,6 +1510,47 @@
               <span class="embed-note__more"><strong>Open in Tableau</strong> still uses URL view filters. If that link misses rows, try <code>TABLEAU_CANVAS_FILTER_USE_VF_PREFIX = true</code> or <code>TABLEAU_CANVAS_FILTER_STYLE = "filter-param"</code>. Embedding uses <code>applyFilterAsync</code> on the sheet named <code>TABLEAU_EMBED_FILTER_WORKSHEET</code> (default <code>SLACKBOTPROMPTS</code> on a dashboard). <a href="https://help.tableau.com/current/api/embedding_api/en-us/docs/embedding_api_filter.html" target="_blank" rel="noopener noreferrer">Tableau Embedding API: Filter the view</a>.</span>
             </p>
           </div>
+        <div class="panel" id="panel-skill-adoption" role="tabpanel" hidden>
+          <div class="placeholder-panel">
+            <div class="placeholder-icon" aria-hidden="true">📈</div>
+            <h2>Skill Adoption</h2>
+            <p>Analytics for skill usage are not yet available. This section will show adoption metrics once the data pipeline is in place.</p>
+            <span class="placeholder-chip">🚧 Coming soon</span>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-slackbot" role="tabpanel" hidden>
+          <section class="usage-intro" aria-labelledby="slackbot-intro-heading">
+            <h2 id="slackbot-intro-heading">🤖 Individual Slackbot Usage</h2>
+            <p>
+              This dashboard shows <strong>individual-level Slackbot usage</strong> from the <em>Slack Success</em> workbook. Use the native Tableau filters within the view to drill into specific users, time periods, or usage patterns.
+            </p>
+            <p style="margin-top: 10px; font-size: 13px; color: var(--slack-muted)">
+              Filters are embedded in the dashboard — use the controls inside the viz to slice the data.
+            </p>
+          </section>
+          <div class="embed-stack">
+            <div class="embed-card">
+              <div class="embed-toolbar">
+                <strong>Slackbot Drill</strong>
+                <span>·</span>
+                <span>Slack Success</span>
+              </div>
+              <div class="embed-frame-wrap" style="min-height: clamp(640px, 80vh, 1400px)">
+                <tableau-viz
+                  id="tableau-viz-slackbot"
+                  title="Tableau: Slackbot Drill"
+                  src="https://prod-uswest-c.online.tableau.com/t/salesforce/views/SlackSuccess/SlackbotDrill"
+                  width="100%"
+                  height="100%"
+                  hide-tabs
+                  toolbar="bottom"
+                ></tableau-viz>
+              </div>
+            </div>
+          </div>
+        </div>
+
         </div>
       </div>
     </div>
@@ -1933,6 +2082,8 @@
       var navItems = document.querySelectorAll(".nav-item[data-channel]");
       var panelAbout = document.getElementById("panel-about");
       var panelTableau = document.getElementById("panel-tableau");
+      var panelSkillAdoption = document.getElementById("panel-skill-adoption");
+      var panelSlackbot = document.getElementById("panel-slackbot");
       var titleEl = document.getElementById("channel-title");
       var badgeEl = document.getElementById("channel-badge");
       var noteEl = document.getElementById("tableau-note");
@@ -2012,13 +2163,28 @@
         var isUsage = channel === "usage";
         var isSkills = channel === "skills";
         var isRole = channel === "ae" || channel === "flm" || channel === "se" || channel === "specialist";
+        var isSkillAdoption = channel === "skill-adoption";
+        var isSlackbot = channel === "slackbot-usage";
 
+        // Panel visibility
         panelAbout.hidden = !isAbout;
-        panelTableau.hidden = isAbout;
+        panelTableau.hidden = !(isUsage || isSkills || isRole);
+        if (panelSkillAdoption) panelSkillAdoption.hidden = !isSkillAdoption;
+        if (panelSlackbot) panelSlackbot.hidden = !isSlackbot;
 
         navItems.forEach(function (btn) {
           btn.classList.toggle("active", btn.getAttribute("data-channel") === channel);
         });
+
+        // Topbar link: show for legacy tableau and slackbot panels
+        if (linkEl) {
+          if (isSlackbot) {
+            linkEl.href = "https://prod-uswest-c.online.tableau.com/t/salesforce/views/SlackSuccess/SlackbotDrill";
+            linkEl.hidden = false;
+          } else {
+            linkEl.hidden = true;
+          }
+        }
 
         if (isAbout) {
           if (tableauApplyTimer) {
@@ -2027,6 +2193,18 @@
           }
           titleEl.textContent = "# about-us";
           badgeEl.textContent = "Canvas";
+          return;
+        }
+
+        if (isSkillAdoption) {
+          titleEl.textContent = "# skill-adoption";
+          badgeEl.textContent = "Analytics";
+          return;
+        }
+
+        if (isSlackbot) {
+          titleEl.textContent = "# slackbot-usage";
+          badgeEl.textContent = "Tableau";
           return;
         }
 
@@ -2051,11 +2229,11 @@
         if (isUsage) {
           ids = byCh.usage || [];
           titleEl.textContent = "# usage-stats";
-          badgeEl.textContent = "Tableau";
+          badgeEl.textContent = "Tableau ⚠ Legacy";
         } else if (isSkills) {
           ids = byCh.skills || [];
           titleEl.textContent = "# skills";
-          badgeEl.textContent = "Tableau";
+          badgeEl.textContent = "Tableau ⚠ Legacy";
         } else if (isRole) {
           ids = byCh[channel] || [];
           titleEl.textContent = "# " + channel;
@@ -2067,13 +2245,19 @@
         var canFilter = ids.length > 0;
         if (tableauNoFilterNote) tableauNoFilterNote.hidden = canFilter;
         if (embedStack) embedStack.hidden = !canFilter;
-        if (linkEl) linkEl.hidden = !canFilter;
         if (noteEl) noteEl.hidden = !canFilter;
 
         if (canFilter) {
+          if (linkEl) {
+            linkEl.href = buildTableauSrc(getFilterIdsForTableau());
+            linkEl.hidden = false;
+          }
           flushApplyTableau();
         } else {
-          if (linkEl) linkEl.href = base;
+          if (linkEl) {
+            linkEl.href = base;
+            linkEl.hidden = true;
+          }
         }
       }
 
