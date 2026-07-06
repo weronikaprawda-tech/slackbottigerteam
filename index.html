@@ -1442,6 +1442,13 @@
             </p>
           </section>
 
+          <section class="usage-intro" id="slackbot-intro-section" hidden aria-labelledby="slackbot-intro-heading">
+            <h2 id="slackbot-intro-heading">🤖 Individual Slackbot Usage</h2>
+            <p>
+              This dashboard shows <strong>individual-level Slackbot usage</strong> from the <em>Slack Success</em> workbook. Use the native Tableau filters inside the view to drill into specific users, time periods, or usage patterns.
+            </p>
+          </section>
+
           <section class="role-intro" id="role-intro-section" hidden>
             <p id="role-intro-text"></p>
           </section>
@@ -1944,6 +1951,8 @@
 
       var base =
         "https://prod-uswest-c.online.tableau.com/t/salesforce/views/IndividualCanvasUsage/GridView/57b0d26f-c991-4fbd-a7a4-98802a4d2a22/SLACKBOTPROMPTS";
+      var slackbotBase =
+        "https://prod-uswest-c.online.tableau.com/t/salesforce/views/SlackSuccess/SlackbotDrill";
       var vizEl = document.getElementById("tableau-viz");
       var linkEl = document.getElementById("tableau-open-link");
       var tableauVizReady = false;
@@ -2094,6 +2103,7 @@
       var canvasHeading = document.getElementById("canvas-ids-heading");
       var tableauNoFilterNote = document.getElementById("tableau-no-filter-note");
       var canvasIdsNote = document.getElementById("canvas-ids-note");
+      var slackbotIntroSection = document.getElementById("slackbot-intro-section");
       var tableauEmbedViewLabel = document.getElementById("tableau-embed-view-label");
       var NOTE_HTML_JTBD =
         '<a href="https://salesforce.enterprise.slack.com/lists/T5J4Q04QG/F0AC2BAGT0C" target="_blank" rel="noopener noreferrer">JTBD list</a> · IDs from CSV <strong>Canvas</strong> by <strong>Target</strong>. Update <code>CANVAS_IDS_BY_CHANNEL</code> in <code>index.html</code> when exports change.';
@@ -2165,32 +2175,20 @@
         var isRole = channel === "ae" || channel === "flm" || channel === "se" || channel === "specialist";
         var isSkillAdoption = channel === "skill-adoption";
         var isSlackbot = channel === "slackbot-usage";
+        var isTableauPanel = isUsage || isSkills || isRole || isSlackbot;
 
         // Panel visibility
         panelAbout.hidden = !isAbout;
-        panelTableau.hidden = !(isUsage || isSkills || isRole);
+        panelTableau.hidden = !isTableauPanel;
         if (panelSkillAdoption) panelSkillAdoption.hidden = !isSkillAdoption;
-        if (panelSlackbot) panelSlackbot.hidden = !isSlackbot;
+        if (panelSlackbot) panelSlackbot.hidden = true; // always hide old separate panel
 
         navItems.forEach(function (btn) {
           btn.classList.toggle("active", btn.getAttribute("data-channel") === channel);
         });
 
-        // Topbar link: show for legacy tableau and slackbot panels
-        if (linkEl) {
-          if (isSlackbot) {
-            linkEl.href = "https://prod-uswest-c.online.tableau.com/t/salesforce/views/SlackSuccess/SlackbotDrill";
-            linkEl.hidden = false;
-          } else {
-            linkEl.hidden = true;
-          }
-        }
-
         if (isAbout) {
-          if (tableauApplyTimer) {
-            clearTimeout(tableauApplyTimer);
-            tableauApplyTimer = null;
-          }
+          if (tableauApplyTimer) { clearTimeout(tableauApplyTimer); tableauApplyTimer = null; }
           titleEl.textContent = "# about-us";
           badgeEl.textContent = "Canvas";
           return;
@@ -2202,27 +2200,37 @@
           return;
         }
 
+        // --- Slackbot: swap viz src, hide canvas controls, show slackbot intro ---
+        if (slackbotIntroSection) slackbotIntroSection.hidden = !isSlackbot;
+        if (usageIntro) usageIntro.hidden = !isUsage;
+        if (roleIntro) roleIntro.hidden = isUsage || isSlackbot;
+
         if (isSlackbot) {
           titleEl.textContent = "# slackbot-usage";
           badgeEl.textContent = "Tableau";
-          // Lazy-inject the viz the first time so it initialises in a visible context
-          var slackbotWrap = document.getElementById("slackbot-embed-wrap");
-          if (slackbotWrap && !slackbotWrap.querySelector("tableau-viz")) {
-            var slackbotViz = document.createElement("tableau-viz");
-            slackbotViz.setAttribute("id", "tableau-viz-slackbot");
-            slackbotViz.setAttribute("title", "Tableau: Slackbot Drill");
-            slackbotViz.setAttribute("src", "https://prod-uswest-c.online.tableau.com/t/salesforce/views/SlackSuccess/SlackbotDrill");
-            slackbotViz.setAttribute("width", "100%");
-            slackbotViz.setAttribute("height", "100%");
-            slackbotViz.setAttribute("hide-tabs", "");
-            slackbotViz.setAttribute("toolbar", "bottom");
-            slackbotWrap.appendChild(slackbotViz);
-          }
+          // Swap viz to SlackbotDrill
+          if (vizEl) vizEl.setAttribute("src", slackbotBase);
+          if (linkEl) { linkEl.href = slackbotBase; linkEl.hidden = false; }
+          // Hide canvas filter panel — no IDs needed for this workbook
+          var canvasPanel = document.querySelector(".canvas-ids-panel");
+          if (canvasPanel) canvasPanel.hidden = true;
+          if (tableauNoFilterNote) tableauNoFilterNote.hidden = true;
+          if (embedStack) embedStack.hidden = false;
+          if (noteEl) noteEl.hidden = true;
+          tableauVizReady = false;
+          lastEmbedFilterKey = null;
           return;
         }
 
-        if (usageIntro) usageIntro.hidden = !isUsage;
-        if (roleIntro) roleIntro.hidden = isUsage;
+        // --- For all other tableau channels, restore viz to IndividualCanvasUsage ---
+        if (vizEl && vizEl.getAttribute("src") !== base) {
+          vizEl.setAttribute("src", base);
+          tableauVizReady = false;
+          lastEmbedFilterKey = null;
+        }
+        var canvasPanel = document.querySelector(".canvas-ids-panel");
+        if (canvasPanel) canvasPanel.hidden = false;
+
         if (roleIntroText && !isUsage) {
           roleIntroText.innerHTML = ROLE_INTRO[channel] || "";
         }
@@ -2261,16 +2269,10 @@
         if (noteEl) noteEl.hidden = !canFilter;
 
         if (canFilter) {
-          if (linkEl) {
-            linkEl.href = buildTableauSrc(getFilterIdsForTableau());
-            linkEl.hidden = false;
-          }
+          if (linkEl) { linkEl.href = buildTableauSrc(getFilterIdsForTableau()); linkEl.hidden = false; }
           flushApplyTableau();
         } else {
-          if (linkEl) {
-            linkEl.href = base;
-            linkEl.hidden = true;
-          }
+          if (linkEl) { linkEl.href = base; linkEl.hidden = true; }
         }
       }
 
