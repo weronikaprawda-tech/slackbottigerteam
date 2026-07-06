@@ -124,6 +124,15 @@
       letter-spacing: 0.04em;
     }
 
+    .nav-subsection-label {
+      padding: 6px 16px 2px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #8f9399;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
     .nav-item {
       display: flex;
       align-items: center;
@@ -1211,32 +1220,36 @@
           <span class="nav-hash">#</span>
           <span class="nav-label">slackbot-usage</span>
         </button>
-        <div class="nav-section-label">JTBD by role</div>
-        <button type="button" class="nav-item" data-channel="ae" title="ae">
-          <span class="nav-hash">#</span>
-          <span class="nav-label">ae</span>
-        </button>
-        <button type="button" class="nav-item" data-channel="flm" title="flm">
-          <span class="nav-hash">#</span>
-          <span class="nav-label">flm</span>
-        </button>
-        <button type="button" class="nav-item" data-channel="se" title="se">
-          <span class="nav-hash">#</span>
-          <span class="nav-label">se</span>
-        </button>
-        <button type="button" class="nav-item" data-channel="specialist" title="specialist">
-          <span class="nav-hash">#</span>
-          <span class="nav-label">specialist</span>
-        </button>
         <div class="nav-section-label">Legacy</div>
+        <div class="nav-subsection-label">Canvas Engagement Stats</div>
         <button type="button" class="nav-item nav-item--legacy" data-channel="usage" title="usage-stats (legacy)">
           <span class="nav-hash">#</span>
           <span class="nav-label">usage-stats</span>
           <span class="nav-legacy-badge">legacy</span>
         </button>
-        <button type="button" class="nav-item nav-item--legacy" data-channel="skills" title="canvases (legacy)">
+        <button type="button" class="nav-item nav-item--legacy" data-channel="skills" title="canvas-engagement (legacy)">
           <span class="nav-hash">#</span>
-          <span class="nav-label">canvases</span>
+          <span class="nav-label">canvas-engagement</span>
+          <span class="nav-legacy-badge">legacy</span>
+        </button>
+        <button type="button" class="nav-item nav-item--legacy" data-channel="ae" title="ae (legacy)">
+          <span class="nav-hash">#</span>
+          <span class="nav-label">ae</span>
+          <span class="nav-legacy-badge">legacy</span>
+        </button>
+        <button type="button" class="nav-item nav-item--legacy" data-channel="flm" title="flm (legacy)">
+          <span class="nav-hash">#</span>
+          <span class="nav-label">flm</span>
+          <span class="nav-legacy-badge">legacy</span>
+        </button>
+        <button type="button" class="nav-item nav-item--legacy" data-channel="se" title="se (legacy)">
+          <span class="nav-hash">#</span>
+          <span class="nav-label">se</span>
+          <span class="nav-legacy-badge">legacy</span>
+        </button>
+        <button type="button" class="nav-item nav-item--legacy" data-channel="specialist" title="specialist (legacy)">
+          <span class="nav-hash">#</span>
+          <span class="nav-label">specialist</span>
           <span class="nav-legacy-badge">legacy</span>
         </button>
       </div>
@@ -1718,12 +1731,12 @@
         specialist:
           "Rows where <strong>Target</strong> contains <strong>Specialist</strong>. <em>Your current CSV has no Specialist Canvas IDs</em> — add rows in Slack, re-export, and update <code>CANVAS_IDS_BY_CHANNEL.specialist</code>; until then there is nothing to filter the dashboard on.",
         skills:
-          "Each item below is an <strong>SMB EMEA Skill</strong> Slack canvas. The Tableau view is filtered on <strong>Canvas ID</strong> (the file id at the end of each canvas URL, e.g. <code>F0A5BHKHFT6</code>). Display names drop the <strong>SMB EMEA Skill -</strong> prefix."
+          "Legacy <strong>canvas engagement</strong> subset. Each item below is an <strong>SMB EMEA Skill</strong> Slack canvas. The Tableau view is filtered on <strong>Canvas ID</strong> (the file id at the end of each canvas URL, e.g. <code>F0A5BHKHFT6</code>). Display names drop the <strong>SMB EMEA Skill -</strong> prefix."
       };
 
       var CANVAS_HEADING = {
         usage: "All canvases (A–Z)",
-        skills: "SMB EMEA Skill canvases (A–Z)",
+        skills: "Canvas engagement (legacy) · SMB EMEA Skill canvases",
         ae: "AE (Target = AE)",
         flm: "FLM (Target = FLM)",
         se: "SE (Target = SE)",
@@ -1931,11 +1944,49 @@
         "https://prod-uswest-c.online.tableau.com/t/salesforce/views/IndividualCanvasUsage/GridView/57b0d26f-c991-4fbd-a7a4-98802a4d2a22/SLACKBOTPROMPTS";
       var slackbotBase =
         "https://prod-uswest-c.online.tableau.com/t/salesforce/views/SlackSuccess/SlackbotDrill";
+      var slackbotLvl5Field = "Lvl 05 Filter";
+      var slackbotLvl5Value = "Giovanni Crispino";
       var vizEl = document.getElementById("tableau-viz");
       var linkEl = document.getElementById("tableau-open-link");
       var tableauVizReady = false;
       var lastEmbedFilterKey = null;
       var activeChannel = "about";
+      var slackbotFilterApplied = false;
+
+      function buildSlackbotSrc() {
+        var q =
+          "?:showVizHome=no&" +
+          encodeURIComponent(slackbotLvl5Field) +
+          "=" +
+          encodeURIComponent(slackbotLvl5Value);
+        return slackbotBase + q;
+      }
+
+      function getActiveFilterTargetSheet(viz) {
+        if (!viz || !viz.workbook) return null;
+        var sheet = viz.workbook.activeSheet;
+        if (!sheet) return null;
+        if (sheet.worksheets && sheet.worksheets.length) {
+          return sheet.worksheets[0];
+        }
+        return sheet;
+      }
+
+      function applySlackbotFilterIfNeeded() {
+        if (activeChannel !== "slackbot-usage" || !tableauVizReady || slackbotFilterApplied) return;
+        var target = getActiveFilterTargetSheet(vizEl);
+        if (!target || typeof target.applyFilterAsync !== "function") return;
+        target
+          .applyFilterAsync(slackbotLvl5Field, [slackbotLvl5Value], "replace")
+          .then(function () {
+            slackbotFilterApplied = true;
+          })
+          .catch(function (err) {
+            if (typeof console !== "undefined" && console.warn) {
+              console.warn("Slackbot filter apply failed:", err);
+            }
+          });
+      }
 
       function getFilterTargetSheet(viz) {
         if (!viz || !viz.workbook) return null;
@@ -2036,6 +2087,7 @@
           tableauVizReady = true;
           lastEmbedFilterKey = null;
           if (activeChannel === "slackbot-usage") {
+            applySlackbotFilterIfNeeded();
             return;
           }
           applyTableau(getFilterIdsForTableau());
@@ -2091,7 +2143,7 @@
       var NOTE_HTML_JTBD =
         '<a href="https://salesforce.enterprise.slack.com/lists/T5J4Q04QG/F0AC2BAGT0C" target="_blank" rel="noopener noreferrer">JTBD list</a> · IDs from CSV <strong>Canvas</strong> by <strong>Target</strong>. Update <code>CANVAS_IDS_BY_CHANNEL</code> in <code>index.html</code> when exports change.';
       var NOTE_HTML_SKILLS =
-        '<strong>SMB EMEA Skill</strong> Slack canvases — each <strong>Canvas ID</strong> is the segment after the last <code>/</code> in the canvas URL. Names omit the <strong>SMB EMEA Skill -</strong> prefix. Edit <code>CANVAS_IDS_BY_CHANNEL.skills</code> and <code>CANVAS_ID_TO_NAME</code> when this set changes.';
+        '<strong>Legacy canvas-engagement</strong> set (SMB EMEA Skill canvases) — each <strong>Canvas ID</strong> is the segment after the last <code>/</code> in the canvas URL. Names omit the <strong>SMB EMEA Skill -</strong> prefix. Edit <code>CANVAS_IDS_BY_CHANNEL.skills</code> and <code>CANVAS_ID_TO_NAME</code> when this set changes.';
 
       var btnChipId = document.getElementById("canvas-toggle-id");
       var btnChipName = document.getElementById("canvas-toggle-name");
@@ -2196,8 +2248,9 @@
           titleEl.textContent = "# slackbot-usage";
           badgeEl.textContent = "Tableau";
           // Swap viz to SlackbotDrill
-          if (vizEl) vizEl.setAttribute("src", slackbotBase + "?:showVizHome=no");
-          if (linkEl) { linkEl.href = slackbotBase; linkEl.hidden = false; }
+          slackbotFilterApplied = false;
+          if (vizEl) vizEl.setAttribute("src", buildSlackbotSrc());
+          if (linkEl) { linkEl.href = buildSlackbotSrc(); linkEl.hidden = false; }
           if (tableauEmbedViewLabel) tableauEmbedViewLabel.textContent = "Slackbot Drill";
           var workbookLabelEl = document.getElementById("tableau-embed-workbook-label");
           if (workbookLabelEl) workbookLabelEl.textContent = "Slack Success";
@@ -2217,9 +2270,10 @@
           vizEl.setAttribute("src", base);
           tableauVizReady = false;
           lastEmbedFilterKey = null;
+          slackbotFilterApplied = false;
         }
         if (tableauEmbedViewLabel) {
-          tableauEmbedViewLabel.textContent = isSkills ? "SMB EMEA skills" : "Grid view";
+          tableauEmbedViewLabel.textContent = isSkills ? "Canvas engagement (legacy)" : "Grid view";
         }
         var workbookLabelEl = document.getElementById("tableau-embed-workbook-label");
         if (workbookLabelEl) workbookLabelEl.textContent = "Individual Canvas Usage";
@@ -2238,7 +2292,7 @@
           canvasIdsNote.innerHTML = isSkills ? NOTE_HTML_SKILLS : NOTE_HTML_JTBD;
         }
         if (tableauEmbedViewLabel) {
-          tableauEmbedViewLabel.textContent = isSkills ? "SMB EMEA skills" : "Grid view";
+          tableauEmbedViewLabel.textContent = isSkills ? "Canvas engagement (legacy)" : "Grid view";
         }
 
         var ids = [];
@@ -2248,12 +2302,12 @@
           badgeEl.textContent = "Tableau ⚠ Legacy";
         } else if (isSkills) {
           ids = byCh.skills || [];
-          titleEl.textContent = "# canvases";
+          titleEl.textContent = "# canvas-engagement";
           badgeEl.textContent = "Tableau ⚠ Legacy";
         } else if (isRole) {
           ids = byCh[channel] || [];
           titleEl.textContent = "# " + channel;
-          badgeEl.textContent = "Tableau";
+          badgeEl.textContent = "Tableau ⚠ Legacy";
         }
 
         renderCanvasIdChips(ids, true);
