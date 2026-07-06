@@ -1173,6 +1173,377 @@
       height: clamp(640px, 80vh, 1400px);
     }
 
+    /* ===== Slackbot stats section (animated) ===== */
+    .sb-stats {
+      flex-shrink: 0;
+      margin: 0 0 6px;
+    }
+
+    .sb-stats[hidden] {
+      display: none !important;
+    }
+
+    .sb-section-head {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 6px 2px 12px;
+    }
+
+    .sb-section-head h2 {
+      margin: 0;
+      font-family: "Plus Jakarta Sans", "Lato", sans-serif;
+      font-size: 17px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .sb-section-head .sb-asof {
+      font-size: 12px;
+      color: var(--slack-muted);
+    }
+
+    .sb-kpis {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 1050px) {
+      .sb-kpis {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .sb-kpi {
+      position: relative;
+      overflow: hidden;
+      padding: 16px 16px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--slack-border);
+      background:
+        linear-gradient(135deg, rgba(21, 93, 160, 0.22) 0%, rgba(7, 21, 37, 0.55) 100%);
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    .sb-kpi.is-in {
+      animation: sbFadeUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .sb-kpi__label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--slack-muted);
+      margin-bottom: 8px;
+    }
+
+    .sb-kpi__value {
+      font-family: "Plus Jakarta Sans", "Lato", sans-serif;
+      font-size: clamp(1.5rem, 2.6vw, 2rem);
+      font-weight: 800;
+      line-height: 1;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    .sb-kpi__value .sb-unit {
+      font-size: 0.6em;
+      font-weight: 700;
+      color: #5ab4f0;
+      margin-left: 2px;
+    }
+
+    .sb-kpi__sub {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #9fd0f5;
+      font-weight: 600;
+    }
+
+    .sb-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .sb-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sb-card {
+      padding: 16px 16px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--slack-border);
+      background: rgba(34, 37, 41, 0.7);
+    }
+
+    .sb-card--wide {
+      grid-column: 1 / -1;
+    }
+
+    .sb-card h3 {
+      margin: 0 0 4px;
+      font-family: "Plus Jakarta Sans", "Lato", sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .sb-card .sb-card-sub {
+      margin: 0 0 12px;
+      font-size: 12px;
+      color: var(--slack-muted);
+      line-height: 1.45;
+    }
+
+    .sb-chart {
+      width: 100%;
+    }
+
+    .sb-chart svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      overflow: visible;
+    }
+
+    .sb-line {
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .sb-line--draw {
+      stroke-dasharray: var(--len);
+      stroke-dashoffset: var(--len);
+      animation: sbDraw 1.4s ease forwards;
+    }
+
+    .sb-area {
+      opacity: 0;
+      animation: sbFadeIn 1.1s ease 0.3s forwards;
+    }
+
+    .sb-dot {
+      opacity: 0;
+      animation: sbFadeIn 0.4s ease forwards;
+    }
+
+    .sb-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #cfd2d6;
+    }
+
+    .sb-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sb-legend i {
+      width: 12px;
+      height: 3px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    .sb-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sb-bar-row {
+      display: grid;
+      grid-template-columns: 120px 1fr auto;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sb-bar-row__name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #e3e4e6;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sb-bar-track {
+      position: relative;
+      height: 20px;
+      border-radius: 5px;
+      background: rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .sb-bar-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 0;
+      border-radius: 5px;
+      background: linear-gradient(90deg, #155da0, #36c5f0);
+      transition: width 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .sb-bar-row__val {
+      font-size: 12px;
+      font-weight: 700;
+      color: #9fd0f5;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .sb-users {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sb-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      opacity: 0;
+      transform: translateX(-8px);
+    }
+
+    .sb-user.is-in {
+      animation: sbSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .sb-user__rank {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      color: #fff;
+      background: linear-gradient(135deg, #144278, #36c5f0);
+    }
+
+    .sb-user__meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sb-user__name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sb-user__org {
+      font-size: 11px;
+      color: var(--slack-muted);
+    }
+
+    .sb-user__val {
+      flex-shrink: 0;
+      text-align: right;
+    }
+
+    .sb-user__val b {
+      display: block;
+      font-size: 13px;
+      color: #9fd0f5;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sb-user__val span {
+      font-size: 10px;
+      color: var(--slack-muted);
+    }
+
+    .sb-insights {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    @media (max-width: 900px) {
+      .sb-insights {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sb-insight {
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--slack-border);
+      background: rgba(21, 93, 160, 0.1);
+      border-left: 3px solid #36c5f0;
+    }
+
+    .sb-insight h4 {
+      margin: 0 0 6px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sb-insight p {
+      margin: 0;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: #d1d2d3;
+    }
+
+    .sb-insight strong {
+      color: #9fd0f5;
+    }
+
+    @keyframes sbFadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes sbSlideIn {
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes sbFadeIn {
+      to { opacity: 1; }
+    }
+
+    @keyframes sbDraw {
+      to { stroke-dashoffset: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sb-kpi, .sb-user { opacity: 1 !important; transform: none !important; animation: none !important; }
+      .sb-line--draw { stroke-dashoffset: 0 !important; animation: none !important; }
+      .sb-area, .sb-dot { opacity: 1 !important; animation: none !important; }
+      .sb-bar-fill { transition: none !important; }
+    }
+
     @media (max-width: 900px) {
       .sidebar {
         width: 72px;
@@ -1457,6 +1828,42 @@
             <p>
               This dashboard shows <strong>individual-level Slackbot usage</strong> from the <em>Slack Success</em> workbook. Use the native Tableau filters inside the view to drill into specific users, time periods, or usage patterns.
             </p>
+          </section>
+
+          <section class="sb-stats" id="slackbot-stats" hidden aria-label="Slackbot usage statistics">
+            <div class="sb-section-head">
+              <h2>📊 Customer Zero — Slackbot at a glance</h2>
+              <span class="sb-asof" id="sb-asof"></span>
+            </div>
+            <div class="sb-kpis" id="sb-kpis"></div>
+            <div class="sb-grid">
+              <div class="sb-card sb-card--wide">
+                <h3>Adoption over time</h3>
+                <p class="sb-card-sub">Share of employees active on Slackbot — Ever (EAU), Monthly (MAU, 28d) and Weekly (WAU, 7d).</p>
+                <div class="sb-chart" id="sb-adoption-chart"></div>
+                <div class="sb-legend">
+                  <span><i style="background:#36c5f0"></i>Ever active %</span>
+                  <span><i style="background:#2eb886"></i>Monthly active %</span>
+                  <span><i style="background:#ecb22e"></i>Weekly active %</span>
+                </div>
+              </div>
+              <div class="sb-card sb-card--wide">
+                <h3>Messages sent to Slackbot</h3>
+                <p class="sb-card-sub">Trailing 28-day message volume across all employees.</p>
+                <div class="sb-chart" id="sb-messages-chart"></div>
+              </div>
+              <div class="sb-card">
+                <h3>Adoption by organisation</h3>
+                <p class="sb-card-sub">Ranked by 28-day message volume (Mgr Lvl 2).</p>
+                <div class="sb-bars" id="sb-orgs"></div>
+              </div>
+              <div class="sb-card">
+                <h3>Top power users (28d messages)</h3>
+                <p class="sb-card-sub">Highest individual message volume in the trailing 28 days.</p>
+                <div class="sb-users" id="sb-top-users"></div>
+              </div>
+            </div>
+            <div class="sb-insights" id="sb-insights"></div>
           </section>
 
           <section class="role-intro" id="role-intro-section" hidden>
@@ -2296,6 +2703,7 @@
       var tableauNoFilterNote = document.getElementById("tableau-no-filter-note");
       var canvasIdsNote = document.getElementById("canvas-ids-note");
       var slackbotIntroSection = document.getElementById("slackbot-intro-section");
+      var slackbotStatsSection = document.getElementById("slackbot-stats");
       var tableauEmbedViewLabel = document.getElementById("tableau-embed-view-label");
       var NOTE_HTML_JTBD =
         '<a href="https://salesforce.enterprise.slack.com/lists/T5J4Q04QG/F0AC2BAGT0C" target="_blank" rel="noopener noreferrer">JTBD list</a> · IDs from CSV <strong>Canvas</strong> by <strong>Target</strong>. Update <code>CANVAS_IDS_BY_CHANNEL</code> in <code>index.html</code> when exports change.';
@@ -2374,6 +2782,7 @@
         panelAbout.hidden = !isAbout;
         panelTableau.hidden = !isTableauPanel;
         if (panelSkillAdoption) panelSkillAdoption.hidden = !isSkillAdoption;
+        if (slackbotStatsSection) slackbotStatsSection.hidden = !isSlackbot;
 
         navItems.forEach(function (btn) {
           btn.classList.toggle("active", btn.getAttribute("data-channel") === channel);
@@ -2419,6 +2828,9 @@
           if (noteEl) noteEl.hidden = true;
           tableauVizReady = false;
           lastEmbedFilterKey = null;
+          if (typeof window.renderSlackbotStats === "function") {
+            window.renderSlackbotStats();
+          }
           return;
         }
 
@@ -2490,6 +2902,260 @@
 
       updateCanvasLegendAndToggle();
       setChannel("about");
+    })();
+  </script>
+
+  <script>
+    /* ===== Customer Zero Slackbot stats (cleaned crosstab export, totals/subtotals removed) ===== */
+    (function () {
+      var DATA = {"labels":["Dec 1","Jan 1","Feb 1","Mar 1","Apr 1","May 1","Jun 1","Jun 6","Jun 13","Jun 20","Jun 27","Jul 1","Jul 4","Jul 5"],"users":[669,670,719,728,731,766,785,786,786,788,788,789,789,787],"eauPct":[67.9,85.2,89.2,95.6,97.5,97.4,96.2,98.1,98.3,98.4,98.4,98.2,98.2,98.5],"wauPct":[55.3,22.2,74.1,85.7,91,91.6,88.9,89.4,92.2,91.2,91.1,92.3,91,91.2],"mauPct":[67.9,78.1,84.6,93.3,95.6,95.6,94,96.2,96.6,96.2,95.7,95.8,95.7,95.9],"msg28d":[13395,26988,42084,58440,102282,96272,132843,137456,145209,150465,158750,167796,179139,179618],"msg7d":[4773,1812,10159,21101,24874,25317,33066,31268,42448,40605,44429,43820,51657,51819],"pos":[17,39,68,142,230,300,371,386,401,419,431,442,449,450],"neg":[21,40,65,101,156,214,253,264,272,279,288,288,289,289],"inTok28d":[null,115,959,2295,3957,4300,3183,3270,3000,2263,1602,1265,1045,1027],"outTok28d":[null,0,0,57,116,121,144,148,151,156,165,176,183,183],"latest":{"users":787,"eau":775,"eauPct":98.5,"wau":718,"wauPct":91.2,"mau":755,"mauPct":95.9,"msg28d":179618,"msg7d":51819,"pos":450,"neg":289,"neverUsed":12},"orgs":[{"org":"Rui Costa","users":194,"eauPct":99.5,"wauPct":95.4,"msg28d":45549},{"org":"Alexis Andreieff","users":158,"eauPct":98.7,"wauPct":95.6,"msg28d":34139},{"org":"Philip Sharpe","users":134,"eauPct":95.5,"wauPct":82.8,"msg28d":31826},{"org":"Conor Gleeson","users":104,"eauPct":99,"wauPct":88.5,"msg28d":17065},{"org":"Herman Heuvinck","users":73,"eauPct":97.3,"wauPct":89,"msg28d":20548},{"org":"Susan OHanlon","users":62,"eauPct":100,"wauPct":90.3,"msg28d":13438},{"org":"Camille Schiavi","users":60,"eauPct":100,"wauPct":93.3,"msg28d":16972}],"topUsers":[{"name":"Feargal McDonnell","org":"Philip Sharpe","msg28d":2389,"msg7d":495},{"name":"Natacha Muller","org":"Camille Schiavi","msg28d":1888,"msg7d":722},{"name":"James Kelly","org":"Philip Sharpe","msg28d":1414,"msg7d":303},{"name":"Laura Connolly","org":"Philip Sharpe","msg28d":1375,"msg7d":344},{"name":"Erwin Safari","org":"Herman Heuvinck","msg28d":1348,"msg7d":182},{"name":"Jennifer Ferrandis-Durand","org":"Camille Schiavi","msg28d":1196,"msg7d":196},{"name":"Cas \u2018t Hart","org":"Herman Heuvinck","msg28d":1192,"msg7d":313},{"name":"Carlota Codina","org":"Alexis Andreieff","msg28d":1180,"msg7d":179},{"name":"Enzo JOAQUIM","org":"Rui Costa","msg28d":1116,"msg7d":358},{"name":"Gonoro Poinssot","org":"Camille Schiavi","msg28d":1075,"msg7d":276}],"asOf":"7/5/2026"};
+
+      var SVGNS = "http://www.w3.org/2000/svg";
+      function el(id) { return document.getElementById(id); }
+      function fmtInt(n) { return (Math.round(n)).toLocaleString("en-US"); }
+      function fmtCompact(n) {
+        if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, "") + "M";
+        if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, "") + "K";
+        return String(Math.round(n));
+      }
+
+      function countUp(node, target, opts) {
+        opts = opts || {};
+        var dur = opts.dur || 1300;
+        var dec = opts.dec || 0;
+        var start = null;
+        function step(ts) {
+          if (start === null) start = ts;
+          var p = Math.min((ts - start) / dur, 1);
+          var eased = 1 - Math.pow(1 - p, 3);
+          var val = target * eased;
+          node.textContent = dec ? val.toFixed(dec) : fmtInt(val);
+          if (p < 1) requestAnimationFrame(step);
+          else node.textContent = dec ? target.toFixed(dec) : fmtInt(target);
+        }
+        requestAnimationFrame(step);
+      }
+
+      function renderKpis() {
+        var L = DATA.latest;
+        var cards = [
+          { label: "Employees tracked", value: L.users, sub: L.neverUsed + " never used Slackbot" },
+          { label: "Ever active (EAU)", value: L.eauPct, unit: "%", dec: 1, sub: fmtInt(L.eau) + " of " + fmtInt(L.users) + " employees" },
+          { label: "Weekly active (WAU)", value: L.wauPct, unit: "%", dec: 1, sub: fmtInt(L.wau) + " active in last 7 days" },
+          { label: "Messages · 28 days", value: L.msg28d, sub: fmtInt(L.msg7d) + " in the last 7 days" },
+          { label: "Positive feedback", value: L.pos, sub: Math.round(L.pos / (L.pos + L.neg) * 100) + "% of all reactions" }
+        ];
+        var wrap = el("sb-kpis");
+        if (!wrap) return;
+        wrap.innerHTML = "";
+        cards.forEach(function (c, i) {
+          var div = document.createElement("div");
+          div.className = "sb-kpi";
+          div.style.animationDelay = (i * 90) + "ms";
+          var valId = "sb-kpi-val-" + i;
+          div.innerHTML =
+            '<div class="sb-kpi__label">' + c.label + '</div>' +
+            '<div class="sb-kpi__value"><span id="' + valId + '">0</span>' +
+            (c.unit ? '<span class="sb-unit">' + c.unit + '</span>' : '') + '</div>' +
+            '<div class="sb-kpi__sub">' + c.sub + '</div>';
+          wrap.appendChild(div);
+          requestAnimationFrame(function () { div.classList.add("is-in"); });
+          countUp(el(valId), c.value, { dec: c.dec || 0, dur: 1300 + i * 120 });
+        });
+      }
+
+      function buildLineChart(container, opts) {
+        var W = 900, H = 300, pad = { t: 18, r: 16, b: 34, l: 40 };
+        var iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+        var labels = opts.labels;
+        var yMin = opts.yMin != null ? opts.yMin : 0;
+        var yMax = opts.yMax != null ? opts.yMax : 100;
+        var n = labels.length;
+        function xf(i) { return pad.l + (n === 1 ? iw / 2 : iw * i / (n - 1)); }
+        function yf(v) { return pad.t + ih - ih * (v - yMin) / (yMax - yMin); }
+
+        var svg = document.createElementNS(SVGNS, "svg");
+        svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+        svg.setAttribute("role", "img");
+
+        // gridlines + y labels
+        var ticks = opts.yTicks || [0, 25, 50, 75, 100];
+        ticks.forEach(function (t) {
+          var y = yf(t);
+          var ln = document.createElementNS(SVGNS, "line");
+          ln.setAttribute("x1", pad.l); ln.setAttribute("x2", W - pad.r);
+          ln.setAttribute("y1", y); ln.setAttribute("y2", y);
+          ln.setAttribute("stroke", "rgba(255,255,255,0.08)");
+          ln.setAttribute("stroke-width", "1");
+          svg.appendChild(ln);
+          var tx = document.createElementNS(SVGNS, "text");
+          tx.setAttribute("x", pad.l - 8); tx.setAttribute("y", y + 4);
+          tx.setAttribute("text-anchor", "end");
+          tx.setAttribute("fill", "rgba(255,255,255,0.4)");
+          tx.setAttribute("font-size", "11");
+          tx.textContent = opts.yFmt ? opts.yFmt(t) : t;
+          svg.appendChild(tx);
+        });
+
+        // x labels (sparse)
+        labels.forEach(function (lb, i) {
+          if (n > 8 && i % 2 !== 0 && i !== n - 1) return;
+          var tx = document.createElementNS(SVGNS, "text");
+          tx.setAttribute("x", xf(i)); tx.setAttribute("y", H - 10);
+          tx.setAttribute("text-anchor", "middle");
+          tx.setAttribute("fill", "rgba(255,255,255,0.45)");
+          tx.setAttribute("font-size", "11");
+          tx.textContent = lb;
+          svg.appendChild(tx);
+        });
+
+        (opts.series || []).forEach(function (s, si) {
+          var pts = s.values.map(function (v, i) { return [xf(i), yf(v)]; });
+          if (s.area) {
+            var ap = "M" + pts[0][0] + "," + yf(yMin);
+            pts.forEach(function (p) { ap += " L" + p[0] + "," + p[1]; });
+            ap += " L" + pts[pts.length - 1][0] + "," + yf(yMin) + " Z";
+            var area = document.createElementNS(SVGNS, "path");
+            area.setAttribute("d", ap);
+            area.setAttribute("fill", s.areaFill || "rgba(54,197,240,0.18)");
+            area.setAttribute("class", "sb-area");
+            svg.appendChild(area);
+          }
+          var d = "M" + pts.map(function (p) { return p[0] + "," + p[1]; }).join(" L");
+          var path = document.createElementNS(SVGNS, "path");
+          path.setAttribute("d", d);
+          path.setAttribute("class", "sb-line sb-line--draw");
+          path.setAttribute("stroke", s.color);
+          svg.appendChild(path);
+          var len = 0;
+          try { len = path.getTotalLength(); } catch (e) { len = 2000; }
+          path.style.setProperty("--len", len);
+          path.style.animationDelay = (si * 200) + "ms";
+
+          // end dot + value label
+          var last = pts[pts.length - 1];
+          var dot = document.createElementNS(SVGNS, "circle");
+          dot.setAttribute("cx", last[0]); dot.setAttribute("cy", last[1]);
+          dot.setAttribute("r", "4"); dot.setAttribute("fill", s.color);
+          dot.setAttribute("class", "sb-dot");
+          dot.style.animationDelay = (900 + si * 200) + "ms";
+          svg.appendChild(dot);
+        });
+
+        container.innerHTML = "";
+        container.appendChild(svg);
+      }
+
+      function renderAdoption() {
+        var c = el("sb-adoption-chart");
+        if (!c) return;
+        buildLineChart(c, {
+          labels: DATA.labels,
+          yMin: 0, yMax: 100,
+          yTicks: [0, 25, 50, 75, 100],
+          yFmt: function (t) { return t + "%"; },
+          series: [
+            { values: DATA.eauPct, color: "#36c5f0" },
+            { values: DATA.mauPct, color: "#2eb886" },
+            { values: DATA.wauPct, color: "#ecb22e" }
+          ]
+        });
+      }
+
+      function renderMessages() {
+        var c = el("sb-messages-chart");
+        if (!c) return;
+        var mx = Math.max.apply(null, DATA.msg28d);
+        var top = Math.ceil(mx / 50000) * 50000;
+        buildLineChart(c, {
+          labels: DATA.labels,
+          yMin: 0, yMax: top,
+          yTicks: [0, top / 4, top / 2, top * 3 / 4, top],
+          yFmt: function (t) { return fmtCompact(t); },
+          series: [
+            { values: DATA.msg28d, color: "#36c5f0", area: true, areaFill: "rgba(54,197,240,0.16)" }
+          ]
+        });
+      }
+
+      function renderOrgs() {
+        var wrap = el("sb-orgs");
+        if (!wrap) return;
+        wrap.innerHTML = "";
+        var max = Math.max.apply(null, DATA.orgs.map(function (o) { return o.msg28d; }));
+        DATA.orgs.forEach(function (o, i) {
+          var row = document.createElement("div");
+          row.className = "sb-bar-row";
+          row.innerHTML =
+            '<div class="sb-bar-row__name" title="' + o.org + '">' + o.org + '</div>' +
+            '<div class="sb-bar-track"><div class="sb-bar-fill"></div></div>' +
+            '<div class="sb-bar-row__val">' + fmtCompact(o.msg28d) + ' · ' + o.wauPct + '% WAU</div>';
+          wrap.appendChild(row);
+          var fill = row.querySelector(".sb-bar-fill");
+          var pct = Math.max(3, (o.msg28d / max) * 100);
+          setTimeout(function () { fill.style.width = pct + "%"; }, 120 + i * 90);
+        });
+      }
+
+      function renderTopUsers() {
+        var wrap = el("sb-top-users");
+        if (!wrap) return;
+        wrap.innerHTML = "";
+        DATA.topUsers.forEach(function (u, i) {
+          var row = document.createElement("div");
+          row.className = "sb-user";
+          row.style.animationDelay = (i * 70) + "ms";
+          row.innerHTML =
+            '<div class="sb-user__rank">' + (i + 1) + '</div>' +
+            '<div class="sb-user__meta"><div class="sb-user__name">' + u.name + '</div>' +
+            '<div class="sb-user__org">' + u.org + '</div></div>' +
+            '<div class="sb-user__val"><b>' + fmtInt(u.msg28d) + '</b><span>' + fmtInt(u.msg7d) + ' · 7d</span></div>';
+          wrap.appendChild(row);
+          requestAnimationFrame(function () { row.classList.add("is-in"); });
+        });
+      }
+
+      function renderInsights() {
+        var wrap = el("sb-insights");
+        if (!wrap) return;
+        var L = DATA.latest;
+        var msgGrowth = Math.round(DATA.msg28d[DATA.msg28d.length - 1] / DATA.msg28d[0]);
+        var posPct = Math.round(L.pos / (L.pos + L.neg) * 100);
+        var inPeak = Math.max.apply(null, DATA.inTok28d.filter(function (x) { return x != null; }));
+        var inNow = DATA.inTok28d[DATA.inTok28d.length - 1];
+        var lead = DATA.orgs[0];
+        var insights = [
+          { icon: "🚀", title: "Near-universal reach", body: "<strong>" + L.eauPct + "%</strong> of employees (" + fmtInt(L.eau) + " of " + fmtInt(L.users) + ") have used Slackbot. Only <strong>" + L.neverUsed + "</strong> have never tried it." },
+          { icon: "🔁", title: "Sticky, habitual usage", body: "<strong>" + L.wauPct + "%</strong> are weekly active and <strong>" + L.mauPct + "%</strong> monthly active — adoption is recurring, not one-off." },
+          { icon: "📈", title: "Volume is compounding", body: "28-day messages grew roughly <strong>" + msgGrowth + "×</strong>, from " + fmtCompact(DATA.msg28d[0]) + " in Dec to <strong>" + fmtCompact(L.msg28d) + "</strong> now." },
+          { icon: "👍", title: "Positive reception", body: "<strong>" + posPct + "%</strong> of lifetime reactions are positive (" + fmtInt(L.pos) + " 👍 vs " + fmtInt(L.neg) + " 👎)." },
+          { icon: "🏆", title: lead.org + "'s org leads", body: "Largest team at <strong>" + fmtInt(lead.users) + "</strong> users, " + lead.eauPct + "% ever-active and <strong>" + fmtCompact(lead.msg28d) + "</strong> messages / 28d." },
+          { icon: "⚡", title: "More output per token", body: "Input tokens (28d) fell from a peak of <strong>" + fmtInt(inPeak) + "M</strong> to <strong>" + fmtInt(inNow) + "M</strong> even as usage kept climbing — responses are getting leaner." }
+        ];
+        wrap.innerHTML = "";
+        insights.forEach(function (it) {
+          var d = document.createElement("div");
+          d.className = "sb-insight";
+          d.innerHTML = '<h4>' + it.icon + ' ' + it.title + '</h4><p>' + it.body + '</p>';
+          wrap.appendChild(d);
+        });
+      }
+
+      var lastRender = 0;
+      window.renderSlackbotStats = function () {
+        var asOf = el("sb-asof");
+        if (asOf) asOf.textContent = "As of " + DATA.asOf + " · 789 employees · totals & subtotals removed";
+        // Throttle re-renders so animations only replay on genuine re-entry.
+        var now = Date.now();
+        if (now - lastRender < 400) return;
+        lastRender = now;
+        renderKpis();
+        renderAdoption();
+        renderMessages();
+        renderOrgs();
+        renderTopUsers();
+        renderInsights();
+      };
     })();
   </script>
 </body>
