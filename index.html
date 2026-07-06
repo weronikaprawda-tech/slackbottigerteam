@@ -1238,6 +1238,60 @@
       height: clamp(640px, 80vh, 1400px);
     }
 
+    /* Drill-down tip shown above the Slackbot Tableau embed */
+    .embed-tip {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin: 0 0 12px;
+      padding: 13px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--slack-border);
+      border-left: 3px solid #36c5f0;
+      background: linear-gradient(135deg, rgba(21, 93, 160, 0.16) 0%, rgba(7, 21, 37, 0.42) 100%);
+    }
+
+    .embed-tip[hidden] {
+      display: none !important;
+    }
+
+    .embed-tip__icon {
+      font-size: 20px;
+      line-height: 1.2;
+      flex-shrink: 0;
+    }
+
+    .embed-tip__body strong {
+      color: #fff;
+    }
+
+    .embed-tip__title {
+      font-family: "Plus Jakarta Sans", "Lato", sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .embed-tip__body p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      line-height: 1.55;
+      color: #d1d2d3;
+    }
+
+    .embed-tip__body .pill {
+      display: inline-block;
+      padding: 1px 7px;
+      margin: 0 1px;
+      border-radius: 6px;
+      background: rgba(54, 197, 240, 0.16);
+      border: 1px solid rgba(54, 197, 240, 0.35);
+      color: #9fd0f5;
+      font-weight: 700;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
     /* ===== Slackbot stats section (animated) ===== */
     .sb-stats {
       flex-shrink: 0;
@@ -2069,6 +2123,17 @@
           <p class="tableau-filter-note" id="tableau-no-filter-note" hidden style="margin: 0 0 8px; font-size: 13px; color: var(--slack-muted)">
             No Canvas IDs for this channel — nothing to pass into the Tableau filter.
           </p>
+          <div class="embed-tip" id="slackbot-embed-tip" hidden>
+            <div class="embed-tip__icon" aria-hidden="true">💡</div>
+            <div class="embed-tip__body">
+              <div class="embed-tip__title">Drill into individual employees</div>
+              <p>
+                On the <strong>right-hand side of the dashboard</strong>, set the grouping parameters (Bucket 1 / 2 / 3) to
+                <span class="pill">Mgr Lvl 6</span> <span class="pill">Mgr Lvl 7</span> and <span class="pill">Name</span>
+                to break the table down to individual employee insights. You can also use the <strong>Search Name</strong> box to jump straight to a person.
+              </p>
+            </div>
+          </div>
           <div class="embed-stack" id="embed-stack">
             <div class="embed-card">
               <div class="embed-toolbar">
@@ -2853,6 +2918,7 @@
       var canvasIdsNote = document.getElementById("canvas-ids-note");
       var slackbotIntroSection = document.getElementById("slackbot-intro-section");
       var slackbotStatsSection = document.getElementById("slackbot-stats");
+      var slackbotEmbedTip = document.getElementById("slackbot-embed-tip");
       var tableauEmbedViewLabel = document.getElementById("tableau-embed-view-label");
       var NOTE_HTML_JTBD =
         '<a href="https://salesforce.enterprise.slack.com/lists/T5J4Q04QG/F0AC2BAGT0C" target="_blank" rel="noopener noreferrer">JTBD list</a> · IDs from CSV <strong>Canvas</strong> by <strong>Target</strong>. Update <code>CANVAS_IDS_BY_CHANNEL</code> in <code>index.html</code> when exports change.';
@@ -2932,6 +2998,7 @@
         panelTableau.hidden = !isTableauPanel;
         if (panelSkillAdoption) panelSkillAdoption.hidden = !isSkillAdoption;
         if (slackbotStatsSection) slackbotStatsSection.hidden = !isSlackbot;
+        if (slackbotEmbedTip) slackbotEmbedTip.hidden = !isSlackbot;
 
         navItems.forEach(function (btn) {
           btn.classList.toggle("active", btn.getAttribute("data-channel") === channel);
