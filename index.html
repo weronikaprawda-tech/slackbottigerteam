@@ -3137,7 +3137,7 @@
   <script>
     /* ===== Customer Zero Slackbot stats (cleaned crosstab export, totals/subtotals removed) ===== */
     (function () {
-      var DATA = {"labels": ["Dec 1", "Jan 1", "Feb 1", "Mar 1", "Apr 1", "May 1", "Jun 1", "Jun 6", "Jun 13", "Jun 20", "Jun 27", "Jul 1", "Jul 4", "Jul 5"], "users": [669, 670, 719, 728, 731, 766, 785, 786, 786, 788, 788, 789, 789, 787], "eauPct": [67.9, 85.2, 89.2, 95.6, 97.5, 97.4, 96.2, 98.1, 98.3, 98.4, 98.4, 98.2, 98.2, 98.5], "wauPct": [55.3, 22.2, 74.1, 85.7, 91, 91.6, 88.9, 89.4, 92.2, 91.2, 91.1, 92.3, 91, 91.2], "mauPct": [67.9, 78.1, 84.6, 93.3, 95.6, 95.6, 94, 96.2, 96.6, 96.2, 95.7, 95.8, 95.7, 95.9], "msg28d": [13395, 26988, 42084, 58440, 102282, 96272, 132843, 137456, 145209, 150465, 158750, 167796, 179139, 179618], "msg7d": [4773, 1812, 10159, 21101, 24874, 25317, 33066, 31268, 42448, 40605, 44429, 43820, 51657, 51819], "pos": [17, 39, 68, 142, 230, 300, 371, 386, 401, 419, 431, 442, 449, 450], "neg": [21, 40, 65, 101, 156, 214, 253, 264, 272, 279, 288, 288, 289, 289], "inTok28d": [null, 115, 959, 2295, 3957, 4300, 3183, 3270, 3000, 2263, 1602, 1265, 1045, 1027], "outTok28d": [null, 0, 0, 57, 116, 121, 144, 148, 151, 156, 165, 176, 183, 183], "latest": {"users": 787, "eau": 775, "eauPct": 98.5, "wau": 718, "wauPct": 91.2, "mau": 755, "mauPct": 95.9, "msg28d": 179618, "msg7d": 51819, "pos": 450, "neg": 289, "neverUsed": 12}, "orgs": [{"org": "Rui Costa", "users": 194, "eauPct": 99.5, "wauPct": 95.4, "msg28d": 45549}, {"org": "Alexis Andreieff", "users": 158, "eauPct": 98.7, "wauPct": 95.6, "msg28d": 34139}, {"org": "Philip Sharpe", "users": 134, "eauPct": 95.5, "wauPct": 82.8, "msg28d": 31826}, {"org": "Conor Gleeson", "users": 104, "eauPct": 99, "wauPct": 88.5, "msg28d": 17065}, {"org": "Herman Heuvinck", "users": 73, "eauPct": 97.3, "wauPct": 89, "msg28d": 20548}, {"org": "Susan OHanlon", "users": 62, "eauPct": 100, "wauPct": 90.3, "msg28d": 13438}, {"org": "Camille Schiavi", "users": 60, "eauPct": 100, "wauPct": 93.3, "msg28d": 16972}], "topUsers": [{"name": "Feargal McDonnell", "org": "Philip Sharpe", "msg28d": 2389, "msg7d": 495}, {"name": "Natacha Muller", "org": "Camille Schiavi", "msg28d": 1888, "msg7d": 722}, {"name": "James Kelly", "org": "Philip Sharpe", "msg28d": 1414, "msg7d": 303}, {"name": "Laura Connolly", "org": "Philip Sharpe", "msg28d": 1375, "msg7d": 344}, {"name": "Erwin Safari", "org": "Herman Heuvinck", "msg28d": 1348, "msg7d": 182}, {"name": "Jennifer Ferrandis-Durand", "org": "Camille Schiavi", "msg28d": 1196, "msg7d": 196}, {"name": "Cas ‘t Hart", "org": "Herman Heuvinck", "msg28d": 1192, "msg7d": 313}, {"name": "Carlota Codina", "org": "Alexis Andreieff", "msg28d": 1180, "msg7d": 179}, {"name": "Enzo JOAQUIM", "org": "Rui Costa", "msg28d": 1116, "msg7d": 358}, {"name": "Gonoro Poinssot", "org": "Camille Schiavi", "msg28d": 1075, "msg7d": 276}], "employees": 789, "asOf": "7/5/2026"};
+      var DATA = {"labels": ["Dec 1", "Jan 1", "Feb 1", "Mar 1", "Apr 1", "May 1", "Jun 1", "Jun 6", "Jun 13", "Jun 20", "Jun 27", "Jul 1", "Jul 4", "Jul 5"], "dates": ["2025-12-01", "2026-01-01", "2026-02-01", "2026-03-01", "2026-04-01", "2026-05-01", "2026-06-01", "2026-06-06", "2026-06-13", "2026-06-20", "2026-06-27", "2026-07-01", "2026-07-04", "2026-07-05"], "users": [669, 670, 719, 728, 731, 766, 785, 786, 786, 788, 788, 789, 789, 787], "eauPct": [67.9, 85.2, 89.2, 95.6, 97.5, 97.4, 96.2, 98.1, 98.3, 98.4, 98.4, 98.2, 98.2, 98.5], "wauPct": [55.3, 22.2, 74.1, 85.7, 91, 91.6, 88.9, 89.4, 92.2, 91.2, 91.1, 92.3, 91, 91.2], "mauPct": [67.9, 78.1, 84.6, 93.3, 95.6, 95.6, 94, 96.2, 96.6, 96.2, 95.7, 95.8, 95.7, 95.9], "msg28d": [13395, 26988, 42084, 58440, 102282, 96272, 132843, 137456, 145209, 150465, 158750, 167796, 179139, 179618], "msg7d": [4773, 1812, 10159, 21101, 24874, 25317, 33066, 31268, 42448, 40605, 44429, 43820, 51657, 51819], "pos": [17, 39, 68, 142, 230, 300, 371, 386, 401, 419, 431, 442, 449, 450], "neg": [21, 40, 65, 101, 156, 214, 253, 264, 272, 279, 288, 288, 289, 289], "inTok28d": [null, 115, 959, 2295, 3957, 4300, 3183, 3270, 3000, 2263, 1602, 1265, 1045, 1027], "outTok28d": [null, 0, 0, 57, 116, 121, 144, 148, 151, 156, 165, 176, 183, 183], "latest": {"users": 787, "eau": 775, "eauPct": 98.5, "wau": 718, "wauPct": 91.2, "mau": 755, "mauPct": 95.9, "msg28d": 179618, "msg7d": 51819, "pos": 450, "neg": 289, "neverUsed": 12}, "orgs": [{"org": "Rui Costa", "users": 194, "eauPct": 99.5, "wauPct": 95.4, "msg28d": 45549}, {"org": "Alexis Andreieff", "users": 158, "eauPct": 98.7, "wauPct": 95.6, "msg28d": 34139}, {"org": "Philip Sharpe", "users": 134, "eauPct": 95.5, "wauPct": 82.8, "msg28d": 31826}, {"org": "Conor Gleeson", "users": 104, "eauPct": 99, "wauPct": 88.5, "msg28d": 17065}, {"org": "Herman Heuvinck", "users": 73, "eauPct": 97.3, "wauPct": 89, "msg28d": 20548}, {"org": "Susan OHanlon", "users": 62, "eauPct": 100, "wauPct": 90.3, "msg28d": 13438}, {"org": "Camille Schiavi", "users": 60, "eauPct": 100, "wauPct": 93.3, "msg28d": 16972}], "topUsers": [{"name": "Feargal McDonnell", "org": "Philip Sharpe", "msg28d": 2389, "msg7d": 495}, {"name": "Natacha Muller", "org": "Camille Schiavi", "msg28d": 1888, "msg7d": 722}, {"name": "James Kelly", "org": "Philip Sharpe", "msg28d": 1414, "msg7d": 303}, {"name": "Laura Connolly", "org": "Philip Sharpe", "msg28d": 1375, "msg7d": 344}, {"name": "Erwin Safari", "org": "Herman Heuvinck", "msg28d": 1348, "msg7d": 182}, {"name": "Jennifer Ferrandis-Durand", "org": "Camille Schiavi", "msg28d": 1196, "msg7d": 196}, {"name": "Cas ‘t Hart", "org": "Herman Heuvinck", "msg28d": 1192, "msg7d": 313}, {"name": "Carlota Codina", "org": "Alexis Andreieff", "msg28d": 1180, "msg7d": 179}, {"name": "Enzo JOAQUIM", "org": "Rui Costa", "msg28d": 1116, "msg7d": 358}, {"name": "Gonoro Poinssot", "org": "Camille Schiavi", "msg28d": 1075, "msg7d": 276}], "employees": 789, "asOf": "7/5/2026"};
 
       var SVGNS = "http://www.w3.org/2000/svg";
       function el(id) { return document.getElementById(id); }
@@ -3202,7 +3202,18 @@
         var n = labels.length;
         var series = opts.series || [];
         var tipFmt = opts.tipFmt || function (v) { return String(v); };
-        function xf(i) { return pad.l + (n === 1 ? iw / 2 : iw * i / (n - 1)); }
+        // Time-proportional X axis when dates are supplied; otherwise even spacing.
+        var times = (opts.dates && opts.dates.length === n)
+          ? opts.dates.map(function (d) { return new Date(d).getTime(); })
+          : null;
+        var tMin = times ? Math.min.apply(null, times) : 0;
+        var tMax = times ? Math.max.apply(null, times) : (n - 1);
+        function xf(i) {
+          if (times) {
+            return pad.l + (tMax === tMin ? iw / 2 : iw * (times[i] - tMin) / (tMax - tMin));
+          }
+          return pad.l + (n === 1 ? iw / 2 : iw * i / (n - 1));
+        }
         function yf(v) { return pad.t + ih - ih * (v - yMin) / (yMax - yMin); }
 
         var svg = document.createElementNS(SVGNS, "svg");
@@ -3230,16 +3241,30 @@
           svg.appendChild(tx);
         });
 
-        // x labels (sparse: first, last, and a few between)
-        labels.forEach(function (lb, i) {
-          var showEvery = n > 10 ? 3 : 2;
-          if (i !== 0 && i !== n - 1 && i % showEvery !== 0) return;
+        // x labels: pick a subset spaced far enough apart to avoid overlap
+        var minGap = W * 0.11;
+        var labelIdx = [];
+        var lastLabelX = -1e9;
+        for (var li = 0; li < n; li++) {
+          var lx = xf(li);
+          if (li === 0 || lx - lastLabelX >= minGap) {
+            labelIdx.push(li);
+            lastLabelX = lx;
+          }
+        }
+        // Always show the final point; drop any kept label too close to it.
+        labelIdx = labelIdx.filter(function (k) {
+          return k === n - 1 || xf(n - 1) - xf(k) >= minGap;
+        });
+        if (labelIdx[labelIdx.length - 1] !== n - 1) labelIdx.push(n - 1);
+
+        labelIdx.forEach(function (i) {
           var tx = document.createElementNS(SVGNS, "text");
           tx.setAttribute("x", xf(i)); tx.setAttribute("y", H - 8);
           tx.setAttribute("text-anchor", i === 0 ? "start" : (i === n - 1 ? "end" : "middle"));
           tx.setAttribute("fill", "rgba(255,255,255,0.42)");
           tx.setAttribute("font-size", "9");
-          tx.textContent = lb;
+          tx.textContent = labels[i];
           svg.appendChild(tx);
         });
 
@@ -3350,11 +3375,13 @@
         function handleMove(e) {
           var rect = svg.getBoundingClientRect();
           var cx = (e.touches ? e.touches[0].clientX : e.clientX);
-          var ratio = (cx - rect.left) / rect.width;
-          var vbx = ratio * W;
-          var i = Math.round((vbx - pad.l) / (iw / Math.max(1, n - 1)));
-          i = Math.max(0, Math.min(n - 1, i));
-          showAt(i);
+          var vbx = ((cx - rect.left) / rect.width) * W;
+          var best = 0, bestD = Infinity;
+          for (var i = 0; i < n; i++) {
+            var d = Math.abs(xf(i) - vbx);
+            if (d < bestD) { bestD = d; best = i; }
+          }
+          showAt(best);
         }
 
         svg.addEventListener("mousemove", handleMove);
@@ -3369,6 +3396,7 @@
         if (!c) return;
         buildLineChart(c, {
           labels: DATA.labels,
+          dates: DATA.dates,
           yMin: 0, yMax: 100,
           yTicks: [0, 50, 100],
           yFmt: function (t) { return t + "%"; },
@@ -3388,6 +3416,7 @@
         var top = Math.ceil(mx / 50000) * 50000;
         buildLineChart(c, {
           labels: DATA.labels,
+          dates: DATA.dates,
           yMin: 0, yMax: top,
           yTicks: [0, top / 2, top],
           yFmt: function (t) { return fmtCompact(t); },

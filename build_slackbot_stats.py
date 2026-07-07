@@ -163,11 +163,20 @@ def build(rows):
 
     labels = [fmt_label(d) for d in dates]
 
+    def iso(d):
+        try:
+            return datetime.strptime(d, "%m/%d/%Y").strftime("%Y-%m-%d")
+        except ValueError:
+            return d
+
+    iso_dates = [iso(d) for d in dates]
+
     def slc(m):
         return gt.get(m, [])[start:]
 
     compact = {
         "labels": labels[start:],
+        "dates": iso_dates[start:],
         "users": slc("User Count"),
         "eauPct": slc("Slackbot EAU %"),
         "wauPct": slc("Slackbot WAU %"),
