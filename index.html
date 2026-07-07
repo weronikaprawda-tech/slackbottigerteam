@@ -1700,44 +1700,171 @@
 
     .sb-insights {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 12px;
       margin-bottom: 6px;
+      align-items: stretch;
     }
 
     @media (max-width: 900px) {
+      .sb-insights {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 560px) {
       .sb-insights {
         grid-template-columns: 1fr;
       }
     }
 
-    .sb-insight {
-      padding: 14px 16px;
-      border-radius: 10px;
+    .sb-ins {
+      display: flex;
+      flex-direction: column;
+      padding: 14px 15px;
+      border-radius: 12px;
       border: 1px solid var(--slack-border);
-      background: rgba(21, 93, 160, 0.1);
-      border-left: 3px solid #36c5f0;
+      background: rgba(34, 37, 41, 0.7);
+      opacity: 0;
+      transform: translateY(10px);
     }
 
-    .sb-insight h4 {
-      margin: 0 0 6px;
-      font-size: 13px;
-      font-weight: 800;
-      color: #fff;
+    .sb-ins.is-in {
+      animation: sbFadeUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .sb-ins--span2 {
+      grid-column: span 2;
+    }
+
+    @media (max-width: 560px) {
+      .sb-ins--span2 {
+        grid-column: span 1;
+      }
+    }
+
+    .sb-ins--accent {
+      background: linear-gradient(135deg, rgba(21, 93, 160, 0.2) 0%, rgba(7, 21, 37, 0.5) 100%);
+    }
+
+    .sb-ins__head {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
+      margin-bottom: 10px;
     }
 
-    .sb-insight p {
-      margin: 0;
-      font-size: 12.5px;
-      line-height: 1.5;
-      color: #d1d2d3;
+    .sb-ins__head .ic {
+      font-size: 15px;
+      line-height: 1;
     }
 
-    .sb-insight strong {
+    .sb-ins__title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--slack-muted);
+    }
+
+    .sb-ins__val {
+      font-family: "Plus Jakarta Sans", "Lato", sans-serif;
+      font-size: clamp(1.4rem, 2.3vw, 1.85rem);
+      font-weight: 800;
+      line-height: 1;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    .sb-ins__sub {
+      margin-top: 7px;
+      font-size: 12px;
+      line-height: 1.45;
+      color: #cfd2d6;
+    }
+
+    .sb-ins__sub strong {
       color: #9fd0f5;
+    }
+
+    .sb-delta {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      margin-left: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 1px 8px;
+      border-radius: 20px;
+      vertical-align: middle;
+    }
+
+    .sb-delta--up { color: #38d39f; background: rgba(46, 184, 134, 0.16); }
+    .sb-delta--down { color: #ff6b93; background: rgba(224, 30, 90, 0.16); }
+
+    /* Engagement funnel bars */
+    .sb-funnel {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-top: 2px;
+    }
+
+    .sb-funnel-row {
+      display: grid;
+      grid-template-columns: 58px 1fr 42px;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sb-funnel-row__lbl {
+      font-size: 12px;
+      font-weight: 600;
+      color: #e3e4e6;
+    }
+
+    .sb-funnel-track {
+      height: 15px;
+      border-radius: 5px;
+      background: rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .sb-funnel-fill {
+      height: 100%;
+      width: 0;
+      border-radius: 5px;
+      transition: width 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .sb-funnel-row__val {
+      font-size: 12px;
+      font-weight: 800;
+      color: #fff;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Feedback split bar */
+    .sb-split {
+      display: flex;
+      height: 16px;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 4px;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .sb-split__pos { width: 0; background: linear-gradient(90deg, #2eb886, #38d39f); transition: width 1.1s cubic-bezier(0.16, 1, 0.3, 1); }
+    .sb-split__neg { width: 0; background: linear-gradient(90deg, #e01e5a, #ff6b93); transition: width 1.1s cubic-bezier(0.16, 1, 0.3, 1); }
+
+    .sb-split-legend {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 12px;
+      color: #cfd2d6;
+      font-weight: 600;
     }
 
     @keyframes sbFadeUp {
@@ -1757,10 +1884,10 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .sb-kpi, .sb-user { opacity: 1 !important; transform: none !important; animation: none !important; }
+      .sb-kpi, .sb-user, .sb-ins { opacity: 1 !important; transform: none !important; animation: none !important; }
       .sb-line--draw { stroke-dashoffset: 0 !important; animation: none !important; }
       .sb-area, .sb-dot { opacity: 1 !important; animation: none !important; }
-      .sb-bar-fill { transition: none !important; }
+      .sb-bar-fill, .sb-funnel-fill, .sb-split__pos, .sb-split__neg { transition: none !important; }
     }
 
     @media (max-width: 900px) {
@@ -3478,30 +3605,135 @@
         });
       }
 
+      function valueDaysAgo(arr, days) {
+        if (!DATA.dates || !DATA.dates.length) return arr[Math.max(0, arr.length - 2)];
+        var ds = DATA.dates.map(function (d) { return new Date(d).getTime(); });
+        var target = ds[ds.length - 1] - days * 86400000;
+        var bi = 0, bd = Infinity;
+        for (var i = 0; i < ds.length; i++) {
+          var diff = Math.abs(ds[i] - target);
+          if (diff < bd) { bd = diff; bi = i; }
+        }
+        return arr[bi];
+      }
+
+      function deltaChip(pct) {
+        var up = pct >= 0;
+        var arrow = up ? "▲" : "▼";
+        var cls = up ? "sb-delta--up" : "sb-delta--down";
+        return '<span class="sb-delta ' + cls + '">' + arrow + " " + Math.abs(Math.round(pct)) + '%</span>';
+      }
+
       function renderInsights() {
         var wrap = el("sb-insights");
         if (!wrap) return;
         var L = DATA.latest;
-        var msgGrowth = Math.round(DATA.msg28d[DATA.msg28d.length - 1] / DATA.msg28d[0]);
+
+        var msgsPerActive = L.mau ? Math.round(L.msg28d / L.mau) : 0;
+        var weekNow = L.msg7d;
+        var weekPrev = valueDaysAgo(DATA.msg7d, 28);
+        var weekDelta = weekPrev ? (weekNow - weekPrev) / weekPrev * 100 : 0;
         var posPct = Math.round(L.pos / (L.pos + L.neg) * 100);
-        var inPeak = Math.max.apply(null, DATA.inTok28d.filter(function (x) { return x != null; }));
+        var negPct = 100 - posPct;
+        var top10 = DATA.topUsers.reduce(function (s, u) { return s + u.msg28d; }, 0);
+        var top10Share = L.msg28d ? (top10 / L.msg28d * 100) : 0;
+        var inTokVals = DATA.inTok28d.filter(function (x) { return x != null; });
+        var inPeak = Math.max.apply(null, inTokVals);
         var inNow = DATA.inTok28d[DATA.inTok28d.length - 1];
-        var lead = DATA.orgs[0];
-        var insights = [
-          { icon: "🚀", title: "Near-universal reach", body: "<strong>" + L.eauPct + "%</strong> of employees (" + fmtInt(L.eau) + " of " + fmtInt(L.users) + ") have used Slackbot. Only <strong>" + L.neverUsed + "</strong> have never tried it." },
-          { icon: "🔁", title: "Sticky, habitual usage", body: "<strong>" + L.wauPct + "%</strong> are weekly active and <strong>" + L.mauPct + "%</strong> monthly active — adoption is recurring, not one-off." },
-          { icon: "📈", title: "Volume is compounding", body: "28-day messages grew roughly <strong>" + msgGrowth + "×</strong>, from " + fmtCompact(DATA.msg28d[0]) + " in Dec to <strong>" + fmtCompact(L.msg28d) + "</strong> now." },
-          { icon: "👍", title: "Positive reception", body: "<strong>" + posPct + "%</strong> of lifetime reactions are positive (" + fmtInt(L.pos) + " 👍 vs " + fmtInt(L.neg) + " 👎)." },
-          { icon: "🏆", title: lead.org + "'s org leads", body: "Largest team at <strong>" + fmtInt(lead.users) + "</strong> users, " + lead.eauPct + "% ever-active and <strong>" + fmtCompact(lead.msg28d) + "</strong> messages / 28d." },
-          { icon: "⚡", title: "More output per token", body: "Input tokens (28d) fell from a peak of <strong>" + fmtInt(inPeak) + "M</strong> to <strong>" + fmtInt(inNow) + "M</strong> even as usage kept climbing — responses are getting leaner." }
-        ];
-        wrap.innerHTML = "";
-        insights.forEach(function (it) {
-          var d = document.createElement("div");
-          d.className = "sb-insight";
-          d.innerHTML = '<h4>' + it.icon + ' ' + it.title + '</h4><p>' + it.body + '</p>';
-          wrap.appendChild(d);
+        var tokDrop = inPeak ? (inPeak - inNow) / inPeak * 100 : 0;
+        var neverPct = L.users ? (L.neverUsed / L.users * 100) : 0;
+
+        var cards = [];
+
+        // 1) Engagement funnel (spans 2)
+        cards.push({
+          cls: "sb-ins--span2 sb-ins--accent",
+          html:
+            '<div class="sb-ins__head"><span class="ic">🎯</span><span class="sb-ins__title">Engagement funnel — they stick around</span></div>' +
+            '<div class="sb-funnel">' +
+              funnelRow("Ever", L.eauPct, "#36c5f0") +
+              funnelRow("Monthly", L.mauPct, "#2eb886") +
+              funnelRow("Weekly", L.wauPct, "#ecb22e") +
+            '</div>' +
+            '<div class="sb-ins__sub">Almost everyone who has ever tried Slackbot is still active <strong>every week</strong> — very little drop-off down the funnel.</div>'
         });
+
+        // 2) Feedback sentiment split
+        cards.push({
+          html:
+            '<div class="sb-ins__head"><span class="ic">💬</span><span class="sb-ins__title">Feedback sentiment</span></div>' +
+            '<div class="sb-ins__val">' + posPct + '% <span style="font-size:0.6em;color:#38d39f;font-weight:700">positive</span></div>' +
+            '<div class="sb-split"><div class="sb-split__pos" data-w="' + posPct + '"></div><div class="sb-split__neg" data-w="' + negPct + '"></div></div>' +
+            '<div class="sb-split-legend"><span>👍 ' + fmtInt(L.pos) + '</span><span>👎 ' + fmtInt(L.neg) + '</span></div>'
+        });
+
+        // 3) Messages per active user
+        cards.push({
+          html:
+            '<div class="sb-ins__head"><span class="ic">🔥</span><span class="sb-ins__title">Depth of use</span></div>' +
+            '<div class="sb-ins__val">' + fmtInt(msgsPerActive) + '</div>' +
+            '<div class="sb-ins__sub">messages per <strong>monthly active user</strong> in the last 28 days.</div>'
+        });
+
+        // 4) This week's volume + delta
+        cards.push({
+          html:
+            '<div class="sb-ins__head"><span class="ic">📈</span><span class="sb-ins__title">Sent this week</span></div>' +
+            '<div class="sb-ins__val">' + fmtCompact(weekNow) + deltaChip(weekDelta) + '</div>' +
+            '<div class="sb-ins__sub">messages in the last 7 days — <strong>' + (weekDelta >= 0 ? "up" : "down") + ' vs 4 weeks ago</strong>.</div>'
+        });
+
+        // 5) Power-user concentration
+        cards.push({
+          html:
+            '<div class="sb-ins__head"><span class="ic">🏆</span><span class="sb-ins__title">Power-user share</span></div>' +
+            '<div class="sb-ins__val">' + top10Share.toFixed(1) + '%</div>' +
+            '<div class="sb-ins__sub">of all 28-day messages come from the <strong>top 10 users</strong>.</div>'
+        });
+
+        // 6) Token efficiency
+        cards.push({
+          html:
+            '<div class="sb-ins__head"><span class="ic">⚡</span><span class="sb-ins__title">Token efficiency</span></div>' +
+            '<div class="sb-ins__val">' + deltaChip(-tokDrop) + '</div>' +
+            '<div class="sb-ins__sub">input tokens (28d) vs their peak, even as message volume keeps <strong>rising</strong>.</div>'
+        });
+
+        // 7) Near-saturation
+        cards.push({
+          html:
+            '<div class="sb-ins__head"><span class="ic">✅</span><span class="sb-ins__title">Near saturation</span></div>' +
+            '<div class="sb-ins__val">' + fmtInt(L.neverUsed) + '</div>' +
+            '<div class="sb-ins__sub">employees have <strong>never</strong> used Slackbot — just ' + neverPct.toFixed(1) + '% of the base.</div>'
+        });
+
+        wrap.innerHTML = "";
+        cards.forEach(function (c, i) {
+          var d = document.createElement("div");
+          d.className = "sb-ins" + (c.cls ? " " + c.cls : "");
+          d.style.animationDelay = (i * 70) + "ms";
+          d.innerHTML = c.html;
+          wrap.appendChild(d);
+          requestAnimationFrame(function () { d.classList.add("is-in"); });
+        });
+
+        // Animate bar widths after mount
+        setTimeout(function () {
+          wrap.querySelectorAll(".sb-funnel-fill").forEach(function (f) {
+            f.style.width = f.getAttribute("data-w") + "%";
+          });
+          wrap.querySelectorAll(".sb-split__pos, .sb-split__neg").forEach(function (f) {
+            f.style.width = f.getAttribute("data-w") + "%";
+          });
+        }, 200);
+      }
+
+      function funnelRow(label, pct, color) {
+        return '<div class="sb-funnel-row">' +
+          '<span class="sb-funnel-row__lbl">' + label + '</span>' +
+          '<span class="sb-funnel-track"><span class="sb-funnel-fill" data-w="' + pct + '" style="background:' + color + '"></span></span>' +
+          '<span class="sb-funnel-row__val">' + pct + '%</span>' +
+        '</div>';
       }
 
       var lastRender = 0;
